@@ -1,0 +1,74 @@
+{
+  "name": "@savantly/ngx-gremlin",
+  "version": "1.0.0",
+  "description": "Gremlin client [Tinkerpop] for an Angular app",
+  "main": "public_api.ts",
+  "homepage": "https://github.com/savantly-net/ngx-gremlin",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/savantly-net/ngx-gremlin.git"
+  },
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "build:dev": "ng build --app dev",
+    "build:lib": "ng-packagr",
+    "test-watch": "ng test",
+    "test": "npm run clean && npm run build:lib && karma start --single-run",
+    "lint": "ng lint",
+    "e2e": "ng e2e",
+    "clean": "rimraf .ng_build dist"
+  },
+  "keywords": [
+    "Tinkerpop",
+    "Gremlin",
+    "Angular"
+  ],
+  "author": "Jeremy@Savantly.net",
+  "license": "MIT",
+  "peerDependencies": {
+    "@angular/common": "^4.4.5",
+    "@angular/core": "^4.4.5",
+    "@angular/http": "^4.4.5",
+    "rxjs": "^5.4.3",
+    "zone.js": "^0.8.17"
+  },
+  "devDependencies": {
+    "@angular/cli": "^1.5.0",
+    "@angular/common": "^4.4.6",
+    "@angular/compiler": "^4.4.6",
+    "@angular/compiler-cli": "^4.4.6",
+    "@angular/core": "^4.4.6",
+    "@angular/forms": "^4.4.5",
+    "@angular/http": "^4.4.5",
+    "@angular/platform-browser": "^4.4.6",
+    "@angular/platform-browser-dynamic": "^4.4.6",
+    "@angular/router": "^4.4.6",
+    "@types/jasmine": "^2.6.0",
+    "angular-ide": "^0.9.31",
+    "codelyzer": "^3.2.0",
+    "core-js": "^2.5.1",
+    "cpr": "^2.2.0",
+    "jasmine-core": "^2.8.0",
+    "karma": "^1.7.1",
+    "karma-chrome-launcher": "^2.2.0",
+    "karma-coverage-istanbul-reporter": "^1.3.0",
+    "karma-firefox-launcher": "^1.0.1",
+    "karma-jasmine": "^1.1.0",
+    "karma-jasmine-html-reporter": "^0.2.2",
+    "karma-spec-reporter": "0.0.31",
+    "ng-packagr": "^1.5.0-rc.1",
+    "ngmakelib": "git+https://github.com/savantly-net/ngmakelib.git",
+    "protractor": "^5.1.2",
+    "rimraf": "^2.6.2",
+    "rxjs": "^5.4.3",
+    "tslint": "^5.7.0",
+    "typescript": "^2.5.2",
+    "zone.js": "^0.8.17"
+  },
+  "dependencies": {
+    "highland": "^2.11.1",
+    "zer": "^0.1.0"
+  }
+}

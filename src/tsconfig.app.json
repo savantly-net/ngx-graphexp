@@ -1,0 +1,22 @@
+{
+  "extends": "../tsconfig.json",
+  "angularCompilerOptions": {
+    "paths": {
+      "@savantly/ngx-menu": [ "../dist/ngx-menu" ],
+      "@angular/*": ["../node_modules/@angular/*"]
+    }
+  },
+  "compilerOptions": {
+    "outDir": "../out-tsc/app",
+    "module": "es2015",
+    "baseUrl": "",
+    "types": [],
+    "paths": {
+      "@savantly/ngx-menu": [ "../dist/ngx-menu" ]
+    }
+  },
+  "exclude": [
+    "test.ts",
+    "**/*.spec.ts"
+  ]
+}

@@ -57,3 +57,10 @@ typings/
 # dotenv environment variables file
 .env
 
+/aot/
+/.settings/
+/dist/
+/.project
+/.rpt2_cache/
+/build/
+/.ng_build/
