@@ -6,5 +6,13 @@
     "entryFile": "public_api.ts",
     "externals": {
     }
+  },
+  "rollup": {
+    "nodeResolve": {
+      "browser": true,
+      "preferBuiltins": false,
+      "jsnext": true,
+      "module": true
+    }
   }
 }

@@ -8,12 +8,13 @@
     "type": "git",
     "url": "https://github.com/savantly-net/ngx-gremlin.git"
   },
+  "browser": true,
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
     "build:dev": "ng build --app dev",
-    "build:lib": "ng-packagr",
+    "build:lib": "node ./node_modules/ng-packagr/cli/main.js -p ./ng-package.json",
     "test-watch": "ng test",
     "test": "npm run clean && npm run build:lib && karma start --single-run",
     "lint": "ng lint",
@@ -58,7 +59,7 @@
     "karma-jasmine": "^1.1.0",
     "karma-jasmine-html-reporter": "^0.2.2",
     "karma-spec-reporter": "0.0.31",
-    "ng-packagr": "^1.5.0-rc.1",
+    "ng-packagr": "https://github.com/savantly-net/ng-packagr/archive/v2.0.0.tar.gz",
     "ngmakelib": "git+https://github.com/savantly-net/ngmakelib.git",
     "protractor": "^5.1.2",
     "rimraf": "^2.6.2",
@@ -68,7 +69,10 @@
     "zone.js": "^0.8.17"
   },
   "dependencies": {
+    "buffer": "^5.0.8",
+    "gremlin-template-string": "^2.0.0",
     "highland": "^2.11.1",
+    "readable-stream": "^2.3.3",
     "zer": "^0.1.0"
   }
 }

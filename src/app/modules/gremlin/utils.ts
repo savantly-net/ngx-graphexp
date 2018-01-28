@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import * as _ from 'lodash';
 
 /**
  * Given optional and polymorphic arguments, return an object with a raw
@@ -6,9 +6,6 @@ import _ from 'lodash';
  * When supplying a query object as first parameter, any bindings supplied
  * as the last parameter will be shallow-merged.
  *
- * @param {String|Object|Function} rawScript
- * @param {Object} rawBindings
- * @return {Object}: { gremlin<String>, bindings<Object> }
  */
 export function buildQueryFromSignature(rawScript: any = '', rawBindings) {
   const { gremlin = rawScript, bindings = rawBindings } = rawScript;
