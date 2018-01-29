@@ -69,6 +69,7 @@
     "zone.js": "^0.8.17"
   },
   "dependencies": {
+    "@savantly/gremlin-js": "^1.0.3",
     "buffer": "^5.0.8",
     "gremlin-template-string": "^2.0.0",
     "highland": "^2.11.1",
