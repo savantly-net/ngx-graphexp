@@ -1,1 +1,1 @@
-export * from './src/app/modules/gremlin/index';
+export * from './src/app/modules/graphexp/graphexp.module';

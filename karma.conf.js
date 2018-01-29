@@ -21,8 +21,7 @@ module.exports = function (config) {
       clearContext: false // leave Jasmine Spec Runner output visible in browser
     },
     files: [
-      { pattern: testPattern, watched: false },
-      { pattern: './node_modules/@angular/material/prebuilt-themes/indigo-pink.css', included: true, watched: false}
+      { pattern: testPattern, watched: false }
     ],
     preprocessors: {
       [testPattern]: ['@angular/cli']

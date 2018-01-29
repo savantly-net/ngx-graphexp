@@ -14,7 +14,7 @@
     "start": "ng serve",
     "build": "ng build",
     "build:dev": "ng build --app dev",
-    "build:lib": "node ./node_modules/ng-packagr/cli/main.js -p ./ng-package.json",
+    "build:lib": "ng-packagr",
     "test-watch": "ng test",
     "test": "npm run clean && npm run build:lib && karma start --single-run",
     "lint": "ng lint",
@@ -32,6 +32,8 @@
     "@angular/common": "^4.4.5",
     "@angular/core": "^4.4.5",
     "@angular/http": "^4.4.5",
+    "@savantly/gremlin-js": "^1.0.5",
+    "buffer": "^5.0.8",
     "rxjs": "^5.4.3",
     "zone.js": "^0.8.17"
   },
@@ -46,8 +48,10 @@
     "@angular/platform-browser": "^4.4.6",
     "@angular/platform-browser-dynamic": "^4.4.6",
     "@angular/router": "^4.4.6",
+    "@savantly/gremlin-js": "^1.0.10",
     "@types/jasmine": "^2.6.0",
     "angular-ide": "^0.9.31",
+    "buffer": "^5.0.8",
     "codelyzer": "^3.2.0",
     "core-js": "^2.5.1",
     "cpr": "^2.2.0",
@@ -59,8 +63,7 @@
     "karma-jasmine": "^1.1.0",
     "karma-jasmine-html-reporter": "^0.2.2",
     "karma-spec-reporter": "0.0.31",
-    "ng-packagr": "https://github.com/savantly-net/ng-packagr/archive/v2.0.0.tar.gz",
-    "ngmakelib": "git+https://github.com/savantly-net/ngmakelib.git",
+    "ng-packagr": "^1.6.0",
     "protractor": "^5.1.2",
     "rimraf": "^2.6.2",
     "rxjs": "^5.4.3",
@@ -68,12 +71,5 @@
     "typescript": "^2.5.2",
     "zone.js": "^0.8.17"
   },
-  "dependencies": {
-    "@savantly/gremlin-js": "^1.0.3",
-    "buffer": "^5.0.8",
-    "gremlin-template-string": "^2.0.0",
-    "highland": "^2.11.1",
-    "readable-stream": "^2.3.3",
-    "zer": "^0.1.0"
-  }
+  "dependencies": {}
 }

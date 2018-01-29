@@ -3,13 +3,13 @@ import { AppComponent } from './app.component';
 import { RouterTestingModule } from '@angular/router/testing';
 import { provideRoutes } from '@angular/router';
 import { APP_BASE_HREF } from '@angular/common';
-import { GremlinModule } from './modules/gremlin'
+import { GraphexpModule } from './modules/graphexp/graphexp.module';
 
 describe('AppComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
-        GremlinModule
+        GraphexpModule
       ],
       declarations: [AppComponent],
       providers: [
