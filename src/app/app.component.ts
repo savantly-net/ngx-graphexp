@@ -1,3 +1,4 @@
+import { GraphexpService } from './modules/graphexp/graphexp.service';
 import { Component } from '@angular/core';
 
 @Component({
@@ -7,7 +8,7 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
 
-  constructor () {
+  constructor (public service: GraphexpService) {
 
 
 //    subMenuItem.items.push(subSubMenuItem);

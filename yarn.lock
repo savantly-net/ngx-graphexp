@@ -170,9 +170,9 @@
     tree-kill "^1.0.0"
     webpack-sources "^1.1.0"
 
-"@savantly/gremlin-js@^1.0.10":
-  version "1.0.10"
-  resolved "https://registry.yarnpkg.com/@savantly/gremlin-js/-/gremlin-js-1.0.10.tgz#cd8e2e91ec4120c9929890c0eaffc4aa5e4af9ea"
+"@savantly/gremlin-js@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@savantly/gremlin-js/-/gremlin-js-1.2.0.tgz#d3d589c4e08012d1d05aa4cc9421b06a4be5e7bd"
 
 "@schematics/angular@~0.1.17":
   version "0.1.17"

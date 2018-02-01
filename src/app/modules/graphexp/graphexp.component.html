@@ -1,4 +1,54 @@
-<div>
-	<input type="text" [(value)]="query" />
-	<button (click)="submit">Submit</button>
+
+<div id="spotContainer">
+	<nav>
+		<fieldset>
+			<legend>Navigation</legend>
+			<label>Property</label>
+			<select [(value)]="searchField">
+				<option>id</option>
+				<optgroup label="Node">
+					<option *ngFor="let item of nodeProperties">{{item}}</option>
+				</optgroup>
+				<optgroup label="Edge">
+					<option *ngFor="let item of edgeProperties">{{item}}</option>
+				</optgroup>
+			</select>
+			<label>Id/Keyword</label>
+			<input [(value)]="searchValue" />
+			<button class="mat-raised-button" (click)="search(searchValue, searchField)">Search</button>
+			<button class="mat-raised-button" name="clear" (click)="clearGraph()">Clear</button>
+			<div class="mat-input-container">
+				<input type="checkbox" name="Freeze" id="freeze-in" /><label>Freeze</label>
+				<input type="checkbox" name="showName_box" id="showName" (click)="showNames()"/><label>Show Labels</label>
+				<input type="number" id="nbLayers" min="1" max="128" (click)="setNumberOfLayers()"><label>Fading Layers</label>
+			</div>
+		</fieldset>
+		
+	</nav>
+	
+	<div class="spot-content">
+		<div class="left_bar">
+			<div id="graphInfoBar">
+				<button class="mat-raised-button" name="graphInfo" (click)="getGraphInfo()">Refresh graph info</button>
+				<input type="checkbox" name="showgraphinfo" id="showgraphinfo" (click)="showGraphInfo()"/>Show/hide graph info
+				<div><br/>
+					<strong>Node Names</strong>
+					<div *ngFor="let item of nodeNames">
+						{{item.key}}: {{item.value}}
+					</div>
+				</div>
+			</div>
+			<div id="graphInfo"></div>
+		</div>
+		<div id="details" class="right_bar">
+			<div id="messageArea"></div>
+			<div id="outputArea"></div>
+			<div id="nodeInfo" style="background-color:transparent;pointer-events:none;"></div>				
+		</div>
+		
+		<div class="main" id="main">
+			<svg></svg>
+		</div>
+	</div>
 </div>
+
