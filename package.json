@@ -34,6 +34,7 @@
     "@angular/http": "^4.4.5",
     "@savantly/gremlin-js": "^1.2.0",
     "buffer": "^5.0.8",
+    "d3": "^4.13.0",
     "rxjs": "^5.4.3",
     "zone.js": "^0.8.17"
   },
@@ -48,12 +49,14 @@
     "@angular/platform-browser": "^4.4.6",
     "@angular/platform-browser-dynamic": "^4.4.6",
     "@angular/router": "^4.4.6",
+    "@savantly/gremlin-js": "^1.2.0",
     "@types/jasmine": "^2.6.0",
     "angular-ide": "^0.9.31",
     "buffer": "^5.0.8",
     "codelyzer": "^3.2.0",
     "core-js": "^2.5.1",
     "cpr": "^2.2.0",
+    "d3": "^4.13.0",
     "jasmine-core": "^2.8.0",
     "karma": "^1.7.1",
     "karma-chrome-launcher": "^2.2.0",
@@ -70,5 +73,5 @@
     "typescript": "^2.5.2",
     "zone.js": "^0.8.17"
   },
-  "dependencies": {}
+  "dependencies": { }
 }

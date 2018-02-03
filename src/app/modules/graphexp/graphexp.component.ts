@@ -1,13 +1,9 @@
-import { GraphexpService } from './graphexp.service';
+import { GraphexpService, GraphsonFormat } from './graphexp.service';
 import { Component, OnInit, Input, AfterViewInit } from '@angular/core';
 import { GremlinService, GremlinClientOptions, GremlinQuery } from '@savantly/gremlin-js';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import * as d3 from 'd3';
 
-
-enum GraphsonFormat {
-  GraphSON3 = 3,
-  GraphSON2 = 2
-}
 
 @Component({
   selector: 'sv-graphexp',
@@ -18,8 +14,6 @@ export class GraphexpComponent implements AfterViewInit {
 
   @Input()
   graphexpService: GraphexpService;
-  @Input()
-  COMMUNICATION_METHOD = GraphsonFormat.GraphSON3;
 
   public searchValue = '';
   public searchField = '';
@@ -27,11 +21,10 @@ export class GraphexpComponent implements AfterViewInit {
   public nodeNames: any[] = [];
   public nodeProperties: string[];
   public edgeProperties: string[];
+  public numberOfLayers = 3;
 
   ngAfterViewInit(): void {
-    this.graphexpService.queryGraphInfo().then((response) => {
-      this.handleGraphInfo(response.data);
-    });
+    this.graphexpService.queryGraphInfo();
   }
 
   search(value: string, field: string) {
@@ -51,178 +44,17 @@ export class GraphexpComponent implements AfterViewInit {
   showGraphInfo() { }
 
   getGraphInfo() {
-    this.graphexpService.queryGraphInfo().then((response) => {
-      this.handleGraphInfo(response.data);
-    }).catch((err) => { console.error(err) });
-  }
-
-  handleGraphInfo(data) {
-    if (this.COMMUNICATION_METHOD === GraphsonFormat.GraphSON3) {
-      data = this.graphson3to1(data);
-    }
-    this.nodeNames.length = 0;
-    data[0].map((nameGroup) => {
-      for (const nameItem of Object.keys(nameGroup)) {
-        this.nodeNames.push({key: nameItem, value: nameGroup[nameItem]});
-      }
-    });
-    this.graphInfoData = data;
-    this.nodeProperties = this.make_properties_list(data[1][0]);
-    this.edgeProperties = this.make_properties_list(data[3][0]);
-    this.updateNavBar();
-    this.updatePropertiesBar();
-    this.updateColorChoices();
-    // display_properties_bar(_node_properties,'nodes','Node properties:');
-    // display_properties_bar(_edge_properties,'edges','Edge properties:');
-    // display_color_choice(_node_properties,'nodes','Node color by:');
+    this.graphexpService.queryGraphInfo();
   }
 
   updatePropertiesBar() {}
 
   updateColorChoices() {}
 
-  graphson3to1(data: any) {
-    // Convert data from graphSON v2 format to graphSON v1
-    if (!(Array.isArray(data) || ((typeof data === 'object') && (data !== null)) )) {
-      return data;
-    }
-    if ('@type' in data) {
-      if (data['@type'] === 'g:List') {
-        data = data['@value'];
-        return this.graphson3to1(data);
-      } else if (data['@type'] === 'g:Set') {
-        data = data['@value'];
-        return data;
-      } else if (data['@type'] === 'g:Map') {
-        const data_tmp = {}
-        for (let i = 0; i < data['@value'].length; i += 2) {
-          let data_key = data['@value'][i];
-          if ( (typeof data_key === 'object') && (data_key !== null) ) {
-            data_key = this.graphson3to1(data_key);
-          }
-          if (Array.isArray(data_key)) {
-            data_key = JSON.stringify(data_key).replace(/\'/g, ' ');
-          }
-          data_tmp[data_key] = this.graphson3to1(data['@value'][i + 1]);
-        }
-        data = data_tmp;
-        return data;
-      } else {
-        data = data['@value'];
-        if ( (typeof data === 'object') && (data !== null) ) {
-          data = this.graphson3to1(data);
-        }
-        return data;
-      }
-    } else if (Array.isArray(data) || ((typeof data === 'object') && (data !== null)) ) {
-      for (const key of Object.keys(data)) {
-        data[key] = this.graphson3to1(data[key]);
-      }
-      return data;
-    }
-    return data;
-  }
-  arrangeData(data) {
-    if (this.COMMUNICATION_METHOD === GraphsonFormat.GraphSON3) {
-      data = this.graphson3to1(data);
-      return this.arrange_datav3(data);
-    } else {
-      return this.arrange_datav2(data);
-    }
-  }
-  arrange_datav3(data): {nodes: any[], links: any[]} {
-      // Extract node and edges from the data returned for 'search' and 'click' request
-      // Create the graph object
-      const nodes = [], links = [];
-      for (const key of Object.keys(data)) {
-        data[key].forEach((item) => {
-          if (!('inV' in item) && this.idIndex(nodes, item.id) == null) { // if vertex and not already in the list
-            item.type = 'vertex';
-            nodes.push(this.extract_infov3(item));
-          }
-          if (('inV' in item) && this.idIndex(links, item.id) == null) {
-            item.type = 'edge';
-            links.push(this.extract_infov3(item));
-          }
-      });
-      }
-    return {nodes: nodes, links: links};
-  }
-  arrange_datav2(data: any): {nodes: any[], links: any[]} {
-    // Extract node and edges from the data returned for 'search' and 'click' request
-    // Create the graph object
-    const nodes = [], links = [];
-    for (const key of Object.keys(data)) {
-      data[key].forEach(function (item) {
-        if (item.type === 'vertex' && this.idIndex(nodes, item.id) === null) { // if vertex and not already in the list
-          nodes.push(this.extract_infov2(item));
-        }
-
-        if (item.type === 'edge' && this.idIndex(links, item.id) == null) {
-          links.push(this.extract_infov2(item));
-        }
-      });
-      }
-    return {nodes: nodes, links: links};
-  }
-
-  extract_infov2(data) {
-    const data_dic = {id: data.id, label: data.label, type: data.type, properties: {}, source: null, target: null};
-    const prop_dic = data.properties;
-    for (const key in prop_dic) {
-        if (prop_dic.hasOwnProperty(key)) {
-        data_dic.properties[key] = prop_dic[key];
-      }
-    }
-    if (data.type === 'edge') {
-      data_dic.source = data.outV;
-      data_dic.target = data.inV;
-    }
-    return data_dic;
-  }
-
-  extract_infov3(data) {
-  const data_dic = {id: data.id, label: data.label, type: data.type, properties: {}, source: null, target: null};
-  const prop_dic = data.properties;
-  for (const key in prop_dic) {
-    if (prop_dic.hasOwnProperty(key)) {
-      let property = null;
-      if (data.type === 'vertex') {// Extracting the Vertexproperties (properties of properties for vertices)
-        property = prop_dic[key];
-        property['summary'] = this.get_vertex_prop_in_list(prop_dic[key]).toString();
-      } else {
-        property = prop_dic[key]['value'];
-      }
-      data_dic.properties[key] = property;
-    }
-  }
-  if (data.type === 'edge') {
-    data_dic.source = data.outV
-    data_dic.target = data.inV
-  }
-  return data_dic
-}
-  get_vertex_prop_in_list(vertexProperty): any {
-    const prop_value_list = [];
-    for (const key of Object.keys(vertexProperty)) {
-      prop_value_list.push(vertexProperty[key]['value']);
-    }
-    return prop_value_list;
-  }
-
   updateNavBar() {
 
   }
-  idIndex(list, elem) {
-    // find the element in list with id equal to elem
-    // return its index or null if there is no
-    for (let i = 0; i < list.length; i++) {
-      if (list[i].id === elem) {
-        return i;
-      }
-    }
-    return null;
-  }
+
 
   handleNodeClick(node) {
     // graph_viz.refresh_data(graph, center_f, active_node);
@@ -232,21 +64,89 @@ export class GraphexpComponent implements AfterViewInit {
     // graph_viz.refresh_data(graph, center_f, active_node);
   }
 
-  make_properties_list(data: {}) {
-    const prop_dic = {};
-    for (let prop_str of Object.keys(data)) {
-      prop_str = prop_str.replace(/[\[\ \"\'\]]/g, ''); // get rid of symbols [,",',] and spaces
-      const prop_list = prop_str.split(',');
-      for (let prop_idx = 0; prop_idx < prop_list.length; prop_idx++) {
-        prop_dic[prop_list[prop_idx]] = 0;
-      }
+
+colorize(value) {
+  this.graphexpService.colorize(value);
+
+}
+
+display_prop(prop) {
+  const prop_id = prop.id;
+  const prop_id_nb = prop.getAttribute('id_nb');
+  const text_base_offset = 10;
+  const text_offset = 10;
+  const prop_name = prop_id.slice(prop_id.indexOf('_') + 1);
+  const item = prop_id.slice(0, prop_id.indexOf('_'));
+  console.log(prop_id, item)
+  if (d3.select('#' + prop_id).property('checked')) {
+    let elements_text;
+    if (item === 'nodes') {
+      elements_text = d3.selectAll('.node');
+    } else if (item === 'edges') {
+      elements_text = d3.selectAll('.edgelabel');
     }
-    const properties_list = [];
-    for (const key of Object.getOwnPropertyNames(prop_dic)) {
-      properties_list.push(key);
+    this.attach_property(elements_text, prop_name, prop_id_nb, item);
+  } else {
+    if (item === 'nodes') {
+      d3.selectAll('.node').select('.' + prop_id).remove();
+    } else if (item === 'edges') {
+      d3.selectAll('.edgelabel').select('.' + prop_id).remove();
     }
-    return properties_list;
+
   }
+}
+
+
+attach_property(graph_objects, prop_name, prop_id_nb, item) {
+  let elements_text;
+  const text_base_offset = 10;
+  const text_offset = 10;
+  const prop_id = item + '_' + prop_name;
+  if (item === 'nodes') {
+    elements_text = graph_objects.append('text').style('pointer-events', 'none');
+  } else if (item === 'edges') {
+    elements_text = graph_objects.append('textPath')
+    .attr('class', 'edge_text')
+    .attr('href', function (d, i) {return '#edgepath' + d.id})
+    .style('text-anchor', 'middle')
+    .style('pointer-events', 'none')
+    .attr('startOffset', '70%');
+    prop_id_nb = prop_id_nb + 1;
+  } else {
+    console.log('Bad item name.'); return 1;
+  }
+  elements_text.classed('prop_details', true).classed(prop_id, true)
+      .attr('dy', (d) => {return graphShapes.node_size(d) + text_base_offset + text_offset * parseInt(prop_id_nb, 10); })
+      // .attr("y", ".31em")
+    .text(function(d) {return get_prop_value(d, prop_name, item); });
+  }
+
+
+get_prop_value(d, prop_name, item) {
+  if (prop_name in d.properties) {
+    if (item === 'nodes') {
+      if (COMMUNICATION_METHOD === 'GraphSON3') {
+        return d.properties[prop_name]['summary'];
+      } else if (COMMUNICATION_METHOD === 'GraphSON1') {
+        return d.properties[prop_name][0].value;
+      }
+    } else if (item === 'edges') {
+      console.log(d.properties[prop_name])
+      return d.properties[prop_name];
+    }
+  } else {
+    return '';
+  }
+}
+
+
+set_nb_layers() {
+  const nb_layers = parseInt(this.numberOfLayers, 10);
+  graph_viz.layers.set_nb_layers(nb_layers);
+
+}
+
+
 
   constructor() {}
 
