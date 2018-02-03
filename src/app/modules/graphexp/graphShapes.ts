@@ -1,19 +1,21 @@
 import {GraphViz} from './graphViz';
-import { GraphexpService } from './graphexp.service';
+import { GraphexpService, GraphsonFormat } from './graphexp.service';
 import * as d3 from 'd3';
 
 export class GraphShapes {
-  edge_label_color: any;
-  color_palette: (item: any) => any = d3.scaleOrdinal(d3.schemeCategory20);
-  colored_prop = 'none';
-  default_node_color = '#333';
-  node_code_color: (item: any) => any;
-  default_edge_color: '#000';
-  default_node_size = 10;
-  default_edge_stroke_width = 2;
+  // Nodes
+  default_node_size = 15;
   default_stroke_width = 2;
-  active_node_margin = 5;
-  active_node_margin_opacity: 0.5;
+  default_node_color = '#80E810';
+  active_node_margin = 6;
+  active_node_margin_opacity = 0.3;
+
+  // Edges
+  default_edge_stroke_width = 3;
+  default_edge_color = '#CCC';
+  edge_label_color = '#111';
+
+  color_palette: (item: any) => any = d3.scaleOrdinal(d3.schemeCategory20);
 
   node_size(d) {
     if ('size' in d) {
@@ -31,15 +33,15 @@ export class GraphShapes {
     }
   }
 
-  node_color(d) {
-    if (this.colored_prop !== 'none') {
-      if (this.colored_prop === 'label') {
-        return this.color_palette(this.node_code_color(d.label));
-      } else if (typeof d.properties[this.colored_prop] !== 'undefined') {
-        if (this.COMMUNICATION_METHOD === 'GraphSON3') {
-          return this.color_palette(this.node_code_color(d.properties[this.colored_prop]['summary']));
+  node_color(d, colored_prop, node_code_color: (label: string) => any) {
+    if (colored_prop !== 'none') {
+      if (colored_prop === 'label') {
+        return this.color_palette(node_code_color(d.label));
+      } else if (typeof d.properties[colored_prop] !== 'undefined') {
+        if (this.graphSONFormat === GraphsonFormat.GraphSON3) {
+          return this.color_palette(node_code_color(d.properties[colored_prop]['summary']));
         } else {
-          return this.color_palette(this.node_code_color(d.properties[this.colored_prop][0].value));
+          return this.color_palette(node_code_color(d.properties[colored_prop][0].value));
         }
       } else if ('color' in d.properties) {
         return d.properties.color[0].value;
@@ -161,7 +163,7 @@ export class GraphShapes {
       .moveToBack()
       .style('visibility', 'hidden');
 
-    node_pin.on('click', this.graph_viz.graph_events.pin_it);
+    node_pin.on('click', this.graph_viz.graphEvents.pin_it);
 
     // spot the active node and draw additional circle around it
     if (with_active_node) {
@@ -187,12 +189,12 @@ export class GraphShapes {
 
   attach_node_actions(node) {
     node.call(d3.drag()
-      .on('start', this.graph_viz.graph_events.dragstarted)
-      .on('drag', this.graph_viz.graph_events.dragged)
-      .on('end', this.graph_viz.graph_events.dragended));
+      .on('start', this.graph_viz.graphEvents.dragstarted)
+      .on('drag', this.graph_viz.graphEvents.dragged)
+      .on('end', this.graph_viz.graphEvents.dragended));
 
 
-    node.on('click', this.graph_viz.graph_events.clicked)
+    node.on('click', this.graph_viz.graphEvents.clicked)
       .on('mouseover', function() {
         d3.select(this).select('.Pin').style('visibility', 'visible');
         d3.select(this).selectAll('.text_details').style('visibility', 'visible');
@@ -275,7 +277,7 @@ export class GraphShapes {
       const prop_id_nb = prop_idx;
       const prop_id = item + '_' + prop_name;
       if ((!d3.select('#' + prop_id).empty()) && d3.select('#' + prop_id).property('checked')) {
-        this.attach_property(selected_items, prop_name, prop_id_nb, item);
+        this.graph_viz.attach_property(selected_items, prop_name, prop_id_nb, item);
       }
     }
   }
@@ -312,15 +314,17 @@ export class GraphShapes {
   }
 
   attach_edge_actions(edge) {
-    edge.on('mouseover', () => {
+    edge.on('mouseover', (theEdge, index, elements) => {
       console.log('mouse over!!');
-      d3.select(this).selectAll('.text_details').style('visibility', 'visible');
+      const line = elements[index];
+      d3.select(line).selectAll('.text_details').style('visibility', 'visible');
     })
-      .on('mouseout', () => {
-        d3.select(this).selectAll('.text_details').style('visibility', 'hidden');
+      .on('mouseout', (theEdge, index, elements) => {
+      const line = elements[index];
+        d3.select(line).selectAll('.text_details').style('visibility', 'hidden');
       })
-      .on('click', (d) => {
-        console.log('edge clicked!'); this.graphexpService.updateSelection(d);
+      .on('click', (theEdge, index, elements) => {
+        console.log('edge clicked!'); this.graphexpService.updateSelection(theEdge);
       });
 
   }
@@ -348,25 +352,25 @@ export class GraphShapes {
 
   colorize(prop_name) {
     // Color the nodes according the value of the property 'prop_name'
-    this.colored_prop = prop_name;
+    let node_code_color = null;
     const value_list = d3.selectAll('.node').data();
     if (prop_name === 'none') {
       d3.selectAll('.base_circle').style('fill', (d) => {
-        return this.node_color(d);
+        return this.default_node_color
       });
       d3.selectAll('.Pin').style('fill', (d) => {
-        return this.node_color(d);
+        return this.default_node_color;
       });
     } else if (prop_name === 'label') {
       const value_set = new Set(value_list.map((d) => {
         return d.label;
       }));
-      this.node_code_color = d3.scaleOrdinal().domain(value_set).range(d3.range(0, value_set.size));
+      node_code_color = d3.scaleOrdinal().domain(value_set).range(d3.range(0, value_set.size));
       d3.selectAll('.base_circle').style('fill', (d) => {
-        return this.color_palette(this.node_code_color(d.label));
+        return this.color_palette(node_code_color(d.label));
       });
       d3.selectAll('.Pin').style('fill', (d) => {
-        return this.color_palette(this.node_code_color(d.label));
+        return this.color_palette(node_code_color(d.label));
       });
     } else {
       const value_set = new Set(value_list.map((d) => {
@@ -374,18 +378,18 @@ export class GraphShapes {
           return d.properties[prop_name][0].value;
         }
       }));
-      this.node_code_color = d3.scaleOrdinal().domain(value_set).range(d3.range(0, value_set.size))// value_set.length])
+      node_code_color = d3.scaleOrdinal().domain(value_set).range(d3.range(0, value_set.size));
       d3.selectAll('.base_circle').style('fill', (d) => {
         if (typeof d.properties[prop_name] !== 'undefined') {
-          return this.color_palette(this.node_code_color(d.properties[prop_name][0].value));
+          return this.color_palette(node_code_color(d.properties[prop_name][0].value));
         }
-        return this.node_color(d);
+        return this.node_color(d, prop_name, node_code_color);
       });
       d3.selectAll('.Pin').style('fill', (d) => {
         if (typeof d.properties[prop_name] !== 'undefined') {
-          return this.color_palette(this.node_code_color(d.properties[prop_name][0].value));
+          return this.color_palette(node_code_color(d.properties[prop_name][0].value));
         }
-        return this.node_color(d);
+        return this.node_color(d, prop_name, node_code_color);
       });
     }
   }
@@ -399,7 +403,7 @@ export class GraphShapes {
     }
   }
 
-  constructor(private COMMUNICATION_METHOD: string, private graph_viz: GraphViz, private graphexpService: GraphexpService) {
+  constructor(private graphSONFormat: GraphsonFormat, private graph_viz: GraphViz, private graphexpService: GraphexpService) {
     // https://github.com/wbkd/d3-extended
     d3.selection.prototype.moveToFront = function() {
       // move the selection to the front

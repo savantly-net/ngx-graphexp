@@ -3,8 +3,14 @@ import {GremlinService, GremlinClientOptions, GremlinQuery, GremlinQueryResponse
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
 export enum GraphsonFormat {
-  GraphSON3 = 3,
-  GraphSON2 = 2
+  GraphSON1 = 1,
+  GraphSON2 = 2,
+  GraphSON3 = 3
+}
+
+export class ArrangedGraphData {
+  nodes: any[];
+  links: any[];
 }
 
 @Injectable()
@@ -23,7 +29,7 @@ export class GraphexpService {
       !isNaN(parseInt(value, 10));
   }
 
-  queryGraphInfo(): Promise<GremlinQueryResponse> {
+  queryGraphInfo() {
     const gremlin_query_nodes = 'nodes = g.V().groupCount().by(label);';
     const gremlin_query_edges = 'edges = g.E().groupCount().by(label);';
     const gremlin_query_nodes_prop = 'nodesprop = g.V().valueMap().select(keys).groupCount();';
@@ -32,10 +38,12 @@ export class GraphexpService {
     const gremlinQuery = gremlin_query_nodes + gremlin_query_nodes_prop
       + gremlin_query_edges + gremlin_query_edges_prop
       + '[nodes.toList(),nodesprop.toList(),edges.toList(),edgesprop.toList()]';
-    return this.executeQuery(gremlinQuery);
+    this.executeQuery(gremlinQuery).then((response: GremlinQueryResponse) => {
+      this.handleGraphInfo(response.data);
+    });
   }
 
-  queryNodes(field: string, value: string): Promise<GremlinQueryResponse> {
+  queryNodes(field: string, value: string): Promise<ArrangedGraphData> {
     const input_string = value;
     const input_field = field;
     let filtered_string = input_string; // You may add .replace(/\W+/g, ''); to refuse any character not in the alphabet
@@ -62,9 +70,13 @@ export class GraphexpService {
       gremlin_query_edges = 'edges = g.V().' + has_str
         + `.aggregate('node').outE().as('edge').inV().where(within('node')).select('edge')`;
       gremlin_query = gremlin_query_nodes + '\n' + gremlin_query_edges + '\n' + '[nodes.toList(),edges.toList()]'
-      console.log(gremlin_query);
-      return this.executeQuery(gremlin_query);
     }
+    console.log(gremlin_query);
+    return new Promise<ArrangedGraphData>((resolve, reject) => {
+       this.executeQuery(gremlin_query).then(response => {
+        resolve(this.arrangeData(response.data));
+       }, error => {reject(error)})
+    });
   }
 
   getRelatedNodes(d: any) {
@@ -88,7 +100,7 @@ export class GraphexpService {
         nodeNames.push({key: nameItem, value: nameGroup[nameItem]});
       }
     });
-    this.nodeNames.next([]);
+    this.nodeNames.next(nodeNames);
     this.graphInfoData.next(data);
     this.nodeProperties.next(this.make_properties_list(data[1][0]));
     this.edgeProperties.next(this.make_properties_list(data[3][0]));

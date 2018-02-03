@@ -1,21 +1,21 @@
 
-<div id="spotContainer">
+<div id="sv_graphexp_container">
 	<nav>
 		<fieldset>
 			<legend>Navigation</legend>
 			<label>Property</label>
 			<select [(value)]="searchField">
-				<option>id</option>
+				<option value="id">id</option>
 				<optgroup label="Node">
-					<option *ngFor="let item of nodeProperties">{{item}}</option>
+					<option *ngFor="let item of nodeProperties | async" [value]="item">{{item}}</option>
 				</optgroup>
 				<optgroup label="Edge">
-					<option *ngFor="let item of edgeProperties">{{item}}</option>
+					<option *ngFor="let item of edgeProperties | async" [value]="item">{{item}}</option>
 				</optgroup>
 			</select>
 			<label>Id/Keyword</label>
 			<input [(value)]="searchValue" />
-			<button class="mat-raised-button" (click)="search(searchValue, searchField)">Search</button>
+			<button class="mat-raised-button" (click)="search()">Search</button>
 			<button class="mat-raised-button" name="clear" (click)="clearGraph()">Clear</button>
 			<div class="mat-input-container">
 				<input type="checkbox" name="Freeze" id="freeze-in" /><label>Freeze</label>
@@ -26,27 +26,24 @@
 		
 	</nav>
 	
-	<div class="spot-content">
-		<div class="left_bar">
-			<div id="graphInfoBar">
+	<div class="sv-graphexp-content">
+		<div class="sv-graphexp-left-bar">
+			<div>
 				<button class="mat-raised-button" name="graphInfo" (click)="getGraphInfo()">Refresh graph info</button>
-				<input type="checkbox" name="showgraphinfo" id="showgraphinfo" (click)="showGraphInfo()"/>Show/hide graph info
+				<input type="checkbox"(click)="showGraphInfo()"/>Show/hide graph info
 				<div><br/>
 					<strong>Node Names</strong>
-					<div *ngFor="let item of nodeNames">
+					<div *ngFor="let item of nodeNames | async">
 						{{item.key}}: {{item.value}}
 					</div>
 				</div>
 			</div>
-			<div id="graphInfo"></div>
 		</div>
-		<div id="details" class="right_bar">
-			<div id="messageArea"></div>
-			<div id="outputArea"></div>
-			<div id="nodeInfo" style="background-color:transparent;pointer-events:none;"></div>				
+		<div class="right_bar">
+				
 		</div>
 		
-		<div class="main" id="main">
+		<div class="sv-graphexp" id="sv_graphexp">
 			<svg></svg>
 		</div>
 	</div>

@@ -1,3 +1,4 @@
+import { GraphViz } from './graphViz';
 import * as d3 from 'd3';
 
 export class GraphLayers {
@@ -17,6 +18,17 @@ export class GraphLayers {
     return this.nb_layers;
   }
 
+  get nodes() {
+    return this._Nodes;
+  }
+  get links() {
+    return this._Links;
+  }
+
+  get _svg() {
+    return this.graphViz._svg;
+  }
+
   push_layers() {
     // old links and nodes become older
     // and are moved to the next deeper layer
@@ -34,7 +46,7 @@ export class GraphLayers {
     this.old_Links = [];
   }
 
-  update_data(d) {
+  update_data(d: {nodes: any[], links: any[] }) {
     // Save the data
     const previous_nodes = this._svg.selectAll('g').filter('.active_node');
     const previous_nodes_data = previous_nodes.data();
@@ -46,9 +58,9 @@ export class GraphLayers {
     // handle the pinned nodes
     const pinned_Nodes = this._svg.selectAll('g').filter('.pinned');
     const pinned_nodes_data = pinned_Nodes.data();
-    this.
+
       // get the node data and merge it with the pinned nodes
-      _Nodes = d.nodes;
+    this._Nodes = d.nodes;
     this._Nodes = this.updateAdd(this._Nodes, pinned_nodes_data);
     // add coordinates to the new active nodes that already existed in the previous step
     this._Nodes = this.transfer_coordinates(this._Nodes, this.old_Nodes);
@@ -148,6 +160,6 @@ export class GraphLayers {
     });
   }
 
-  constructor(private _svg: any) { }
+  constructor(private graphViz: GraphViz) { }
 
 }

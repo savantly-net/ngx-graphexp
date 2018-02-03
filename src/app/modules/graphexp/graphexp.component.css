@@ -1,3 +1,7 @@
+* {
+	transform-origin: 0px 0px 0px;
+}
+
 .edge {
 	stroke: #999;
 	stroke-opacity: 0.8;
@@ -50,11 +54,11 @@
 	pointer-events: all;
 }
 
-.spot-content {
+.sv-graphexp-content {
 	padding: 1em;
 }
 
-.main {
+.sv-graphexp {
 	position: absolute;
 	left: 0;
 	width: 100%;
@@ -62,24 +66,21 @@
 	overflow: hidden;
 }
 
-.left_bar, .right_bar {
-	z-index: 100;
+.sv-graphexp-left-bar, .sv-graphexp-right-bar {
+	z-index: 100; # graphInfoBar li { padding-left : 0;
+	margin-left: -5px;
+	list-style: none;
 }
 
-.left_bar {
+}
+.sv-graphexp-left-bar {
 	position: absolute;
 	left: 0;
 	margin-left: 1em;
 }
 
-.right_bar {
+.sv-graphexp-right-bar {
 	position: absolute;
 	right: 0;
 	margin-right: 1em;
-}
-
-#graphInfoBar li {
-	padding-left: 0;
-	margin-left: -5px;
-	list-style: none;
 }

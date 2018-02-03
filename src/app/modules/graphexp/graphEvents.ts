@@ -1,6 +1,15 @@
+import { GraphShapes } from './graphShapes';
+import { GraphViz } from './graphViz';
+import { GraphexpService } from './graphexp.service';
 import * as d3 from 'd3';
 
 export class GraphEvents {
+
+  graphexpService: GraphexpService;
+  graphShapes: GraphShapes;
+  _simulation: any;
+  _svg: any;
+
   //////////////////////////////////
   // Handling mouse events
 
@@ -11,7 +20,7 @@ export class GraphEvents {
   }
 
   dragged(d) {
-    const connected_edges = get_node_edges(d.id);
+    const connected_edges = this.graphViz.get_node_edges(d.id);
     const f_connected_edges = connected_edges.filter('*:not(.active_edge)')
     if (f_connected_edges._groups[0].length === 0) {
       d.fx = d3.event.x;
@@ -38,29 +47,30 @@ export class GraphEvents {
 
   clicked(d) {
     d3.select('.focus_node').remove();
-    const input = document.getElementById('freeze-in');
-    const isChecked = input.checked;
-    if (isChecked) {
-      infobox.display_info(d);
-    } else {
+    this.
+      // TODO: wire up 'freeze' button
+      // const input = document.getElementById('freeze-in');
+      // const isChecked = input.checked;
+      // if (isChecked) {
+      //  infobox.display_info(d);
+      // } else {
       _simulation.stop();
-      // remove the oldest links and nodes
-      const stop_layer = layers.depth() - 1;
-      _svg.selectAll('.old_node' + stop_layer).remove();
-      _svg.selectAll('.old_edge' + stop_layer).remove();
-      _svg.selectAll('.old_edgepath' + stop_layer).remove();
-      _svg.selectAll('.old_edgelabel' + stop_layer).remove();
-      infobox.display_info(d);
-      graphioGremlin.click_query(d);
-      console.log('event!!')
-    }
+    // remove the oldest links and nodes
+    const stop_layer = this.graphViz.graphLayers.depth() - 1;
+    this._svg.selectAll('.old_node' + stop_layer).remove();
+    this._svg.selectAll('.old_edge' + stop_layer).remove();
+    this._svg.selectAll('.old_edgepath' + stop_layer).remove();
+    this._svg.selectAll('.old_edgelabel' + stop_layer).remove();
+    this.graphViz.displayInfo(d);
+    this.graphexpService.getRelatedNodes(d);
+    console.log('node clicked')
   }
 
 
   pin_it(d) {
     d3.event.stopPropagation();
     const node_pin = d3.select(this);
-    const pinned_node = d3.select(this.parentNode);
+    const pinned_node = d3.select(node_pin.parentNode);
     // console.log('Pinned!')
     // console.log(pinned_node.classed('node'));
     if (pinned_node.classed('active_node')) {
@@ -77,5 +87,10 @@ export class GraphEvents {
     }
   }
 
-  constructor(private _simulation: any, private graphShapes: any) { }
+  constructor(private graphViz: GraphViz) {
+    this.graphexpService = graphViz.graphexpService;
+    this.graphShapes = graphViz.graphShapes;
+    this._simulation = graphViz._simulation;
+    this._svg = graphViz._svg;
+  }
 }
