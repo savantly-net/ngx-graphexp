@@ -7,8 +7,11 @@ export class GraphEvents {
 
   graphexpService: GraphexpService;
   graphShapes: GraphShapes;
-  _simulation: any;
   _svg: any;
+
+  get _simulation() {
+    return this.graphViz._simulation;
+  }
 
   //////////////////////////////////
   // Handling mouse events
@@ -90,7 +93,6 @@ export class GraphEvents {
   constructor(private graphViz: GraphViz) {
     this.graphexpService = graphViz.graphexpService;
     this.graphShapes = graphViz.graphShapes;
-    this._simulation = graphViz._simulation;
     this._svg = graphViz._svg;
   }
 }

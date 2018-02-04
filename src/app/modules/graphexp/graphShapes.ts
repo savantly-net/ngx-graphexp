@@ -33,7 +33,9 @@ export class GraphShapes {
     }
   }
 
-  node_color(d, colored_prop, node_code_color: (label: string) => any) {
+  node_color(d) {
+    return this.default_node_color;
+    /*
     if (colored_prop !== 'none') {
       if (colored_prop === 'label') {
         return this.color_palette(node_code_color(d.label));
@@ -52,7 +54,7 @@ export class GraphShapes {
       return d.properties.color[0].value;
     } else {
       return this.default_node_color;
-    }
+    } */
   }
 
   node_title(d) {
@@ -128,10 +130,10 @@ export class GraphShapes {
 
     // Create the circle shape
     const node_base_circle = node_deco.append('circle').classed('base_circle', true)
-      .attr('r', this.node_size)
-      .style('stroke-width', this.node_stroke_width)
+      .attr('r', (d) => { return this.node_size(d); })
+      .style('stroke-width', (d) => { return this.node_stroke_width(d); })
       .style('stroke', 'black')
-      .attr('fill', this.node_color);
+      .attr('fill', (d) => { return this.node_color(d); });
     node_base_circle.append('title').text(this.node_title);
 
     // Add the text to the nodes
@@ -189,12 +191,12 @@ export class GraphShapes {
 
   attach_node_actions(node) {
     node.call(d3.drag()
-      .on('start', this.graph_viz.graphEvents.dragstarted)
-      .on('drag', this.graph_viz.graphEvents.dragged)
-      .on('end', this.graph_viz.graphEvents.dragended));
+      .on('start', (ev) => { this.graph_viz.graphEvents.dragstarted(ev) })
+      .on('drag', (ev) => { this.graph_viz.graphEvents.dragged(ev) })
+      .on('end', (ev) => { this.graph_viz.graphEvents.dragended(ev) }));
 
 
-    node.on('click', this.graph_viz.graphEvents.clicked)
+    node.on('click', (ev) => { this.graph_viz.graphEvents.clicked(ev) })
       .on('mouseover', function() {
         d3.select(this).select('.Pin').style('visibility', 'visible');
         d3.select(this).selectAll('.text_details').style('visibility', 'visible');
@@ -383,13 +385,13 @@ export class GraphShapes {
         if (typeof d.properties[prop_name] !== 'undefined') {
           return this.color_palette(node_code_color(d.properties[prop_name][0].value));
         }
-        return this.node_color(d, prop_name, node_code_color);
+        return this.node_color(d);
       });
       d3.selectAll('.Pin').style('fill', (d) => {
         if (typeof d.properties[prop_name] !== 'undefined') {
           return this.color_palette(node_code_color(d.properties[prop_name][0].value));
         }
-        return this.node_color(d, prop_name, node_code_color);
+        return this.node_color(d);
       });
     }
   }
