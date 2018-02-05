@@ -4,7 +4,7 @@
 		<fieldset>
 			<legend>Navigation</legend>
 			<label>Property</label>
-			<select [(value)]="searchField">
+			<select [(ngModel)]="searchField">
 				<option value="id">id</option>
 				<optgroup label="Node">
 					<option *ngFor="let item of nodeProperties | async" [value]="item">{{item}}</option>
@@ -14,14 +14,12 @@
 				</optgroup>
 			</select>
 			<label>Id/Keyword</label>
-			<input [(value)]="searchValue" />
+			<input name="searchValue" [(ngModel)]="searchValue" />
 			<button class="mat-raised-button" (click)="search()">Search</button>
 			<button class="mat-raised-button" name="clear" (click)="clearGraph()">Clear</button>
-			<div class="mat-input-container">
-				<input type="checkbox" name="Freeze" id="freeze-in" /><label>Freeze</label>
-				<input type="checkbox" name="showName_box" id="showName" (click)="showNames()"/><label>Show Labels</label>
-				<input type="number" id="nbLayers" min="1" max="128" (click)="setNumberOfLayers()"><label>Fading Layers</label>
-			</div>
+			<input type="checkbox" name="Freeze" id="freeze-in" /><label>Freeze</label>
+			<input type="checkbox" name="showName_box" id="showName" (click)="showNames()"/><label>Show Labels</label>
+			<input type="number" id="nbLayers" min="1" max="128" (click)="setNumberOfLayers()" [(ngModel)]="numberOfLayers"><label>Visible Layers</label>
 		</fieldset>
 		
 	</nav>
@@ -30,8 +28,8 @@
 		<div class="sv-graphexp-left-bar">
 			<div>
 				<button class="mat-raised-button" name="graphInfo" (click)="getGraphInfo()">Refresh graph info</button>
-				<input type="checkbox"(click)="showGraphInfo()"/>Show/hide graph info
-				<div><br/>
+				<input type="checkbox" [(ngModel)]="showGraphInfo" (click)="toggleGraphInfo()"/>Show/hide graph info
+				<div *ngIf="showGraphInfo"><br/>
 					<strong>Node Names</strong>
 					<div *ngFor="let item of nodeNames | async">
 						{{item.key}}: {{item.value}}
@@ -39,10 +37,14 @@
 				</div>
 			</div>
 		</div>
-		<div class="right_bar">
+		<div class="sv-graphexp-right-bar">
 			<strong>Selected Node</strong>
 				<div *ngIf="selectedNode">
-					{{selectedNode}}
+					<div>Label: {{selectedNode.label}}</div>
+					<div>Type: {{selectedNode.type}}</div>
+					<div *ngFor="let prop of getFlattenedNodeProperties(selectedNode)">
+						<div>{{prop.name}}: {{prop.value}}</div>
+					</div>
 				</div>
 		</div>
 		

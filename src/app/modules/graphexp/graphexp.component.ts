@@ -1,5 +1,7 @@
+import { GraphConfig } from './graphViz/graphConfig';
 import {GraphViz} from './graphViz/graphViz';
 import {GraphexpService, GraphsonFormat} from './graphexp.service';
+import { D3Node } from './nodes/d3Node';
 import {Component, OnInit, Input, AfterViewInit, ViewEncapsulation} from '@angular/core';
 import {GremlinService, GremlinClientOptions, GremlinQuery} from '@savantly/gremlin-js';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
@@ -17,12 +19,13 @@ export class GraphexpComponent implements AfterViewInit {
   @Input()
   graphexpService: GraphexpService;
   @Input()
-  graphsonFormat: GraphsonFormat = GraphsonFormat.GraphSON3;
+  graphConfig?: GraphConfig;
 
   public searchValue = '';
   public searchField = 'id';
   public graphInfoData: {};
   public numberOfLayers = 3;
+  public showGraphInfo = true;
   private graphViz: GraphViz;
 
   get selectedNode() {
@@ -44,7 +47,10 @@ export class GraphexpComponent implements AfterViewInit {
   };
 
   ngAfterViewInit(): void {
-    this.graphViz = new GraphViz(this.graphexpService, this.graphsonFormat);
+    if (!this.graphConfig) {
+      this.graphConfig = new GraphConfig();
+    }
+    this.graphViz = new GraphViz(this.graphexpService, this.graphConfig);
     this.graphViz.init('#sv_graphexp');
     this.graphexpService.queryGraphInfo();
   }
@@ -52,49 +58,41 @@ export class GraphexpComponent implements AfterViewInit {
   search() {
     console.log(`searching field: ${this.searchField}, value: ${this.searchValue}`);
       this.graphexpService.queryNodes(this.searchField, this.searchValue).then(data => {
-        this.graphViz.refresh_data(data, 1, null);
+        this.graphViz.refreshData(data, 1, null);
       }).catch((err) => {
         console.error(err);
       });
+  }
+
+  getFlattenedNodeProperties(node: D3Node) {
+    const props = [];
+    for (const prop of Object.keys(node.properties)) {
+      const val = JSON.stringify(node.properties[prop]);
+      props.push({
+        name: prop,
+        value: val
+      });
+    }
+    return props;
   }
 
   showNames() {
   }
 
   setNumberOfLayers() {
+    this.graphConfig.numberOfLayers = this.numberOfLayers;
   }
 
   clearGraph() {
-
+    this.graphViz.clear();
   }
 
-  showGraphInfo() {}
+  toggleGraphInfo() {
+    this.showGraphInfo = !this.showGraphInfo;
+  }
 
   getGraphInfo() {
     this.graphexpService.queryGraphInfo();
-  }
-
-  updatePropertiesBar() {}
-
-  updateColorChoices() {}
-
-  updateNavBar() {
-
-  }
-
-
-  handleNodeClick(node) {
-    // graph_viz.refresh_data(graph, center_f, active_node);
-  }
-  handleSearch(data) {
-    // const center_f = 1;
-    // graph_viz.refresh_data(graph, center_f, active_node);
-  }
-
-
-  colorize(value) {
-    this.graphViz.colorize(value);
-
   }
 
   constructor() {}

@@ -3,15 +3,10 @@ import {GraphViz} from './graphViz';
 import * as d3 from 'd3';
 
 export class GraphNodes {
-  // Nodes
-  default_node_size = 15;
-  default_stroke_width = 2;
-  default_node_color = '#80E810';
-  active_node_margin = 6;
-  active_node_margin_opacity = 0.3;
 
-  colorPalette: (item: any) => any = d3.scaleOrdinal(d3.schemeCategory20);
-
+  get config() {
+    return this.graphViz.config;
+  }
   get graphRoot() {
     return this.graphViz.graphRoot;
   }
@@ -28,12 +23,7 @@ export class GraphNodes {
    * get all active nodes in the graph
    */
   get graphNodes() {
-    // Existing active nodes
-    const allNodes = this.graphRoot.selectAll('g').filter('.active_node')
-      .data(this.nodeModels, (n) => {
-        return n.id;
-      });
-    return allNodes;
+    return this.graphViz.selectGraphNodes;
   }
 
   /**
@@ -64,6 +54,7 @@ export class GraphNodes {
   }
 
   decorateNodes(node) {
+    const _self = this;
     const node_deco = node.append('g')
       .attr('class', 'active_node').attr('ID', function(d) {
         return d.id;
@@ -71,47 +62,49 @@ export class GraphNodes {
       .classed('node', true);
 
     // Attach the event listener
-    this.attach_node_actions(node_deco)
+    this.attachNodeEvents(node_deco)
     node_deco.moveToFront();
 
     // Create the circle shape
     const node_base_circle = node_deco.append('circle').classed('base_circle', true)
-      .attr('r', this.default_node_size)
-      .style('stroke-width', this.default_stroke_width)
+      .attr('r', (d) => this.getNodeSize(d))
+      .style('stroke-width', (d) => this.getNodeStrokeWidth(d))
       .style('stroke', 'black')
-      .attr('fill', this.default_node_color);
-    node_base_circle.append('title').text('todo: title');
+      .attr('fill', (d) => this.getNodeColor(d));
+    node_base_circle.append('title').text(d => this.getNodeText(d));
 
     // Add the text to the nodes
     node_deco.append('text').classed('text_details', true)
       .attr('x', (d) => {
-        return this.default_node_size + 2;
+        return this.config.default_node_size + 2;
       })
-      .text('todo: text-details')
+      .text(d => this.getNodeText(d))
       .style('visibility', 'hidden');
 
     node_deco.append('text').classed('text_details', true)
       .attr('x', (d) => {
-        return this.default_node_size + 4;
+        return this.config.default_node_size + 4;
       })
-      .attr('y', this.default_node_size)
-      .text('todo: subtext')
+      .attr('y', this.config.default_node_size)
+      .text(d => this.getNodeSubText(d))
       .style('visibility', 'hidden');
 
 
     // Add the node pin
     const node_pin = node_deco.append('circle').classed('Pin', true)
       .attr('r', (d) => {
-        return this.default_node_size / 2;
+        return this.config.default_node_size / 2;
       })
       .attr('transform', (d) => {
-        return 'translate(' + (this.default_node_size * 3 / 4) + ',' + (-this.default_node_size * 3 / 4) + ')';
+        return 'translate(' + (this.config.default_node_size * 3 / 4) + ',' + (-this.config.default_node_size * 3 / 4) + ')';
       })
-      .attr('fill', this.default_node_color)
+      .attr('fill', this.config.default_node_color)
       .moveToBack()
       .style('visibility', 'hidden');
 
-    node_pin.on('click', this.pin_it);
+    node_pin.on('click', function(this, d) {
+      _self.pinIt(this, d);
+    });
 
     // spot the active node and draw additional circle around it
     /* TODO: make active node different
@@ -133,7 +126,7 @@ export class GraphNodes {
     return node_deco;
   }
 
-  attach_node_actions(node) {
+  attachNodeEvents(node) {
     node.call(d3.drag()
       .on('start', (ev) => {this.dragstarted(ev)})
       .on('drag', (ev) => {this.dragged(ev)})
@@ -156,7 +149,7 @@ export class GraphNodes {
       });
   }
 
-   get_node_edges(node_id) {
+   getConnectedEdgesByNodeId(node_id) {
     // Return the in and out edges of node with id 'node_id'
     const connected_edges = d3.selectAll('.edge').filter(
       function(item) {
@@ -181,7 +174,7 @@ export class GraphNodes {
   }
 
   dragged(d) {
-    const connected_edges = this.get_node_edges(d.id);
+    const connected_edges = this.getConnectedEdgesByNodeId(d.id);
     const f_connected_edges = connected_edges.filter('*:not(.active_edge)')
     if (f_connected_edges._groups[0].length === 0) {
       d.fx = d3.event.x;
@@ -234,11 +227,11 @@ export class GraphNodes {
   }
 
 
-  pin_it(d) {
+  pinIt(elem, data) {
     d3.event.stopPropagation();
-    const node_pin = d3.select(this);
-    const pinned_node = d3.select(node_pin.parentNode);
-    if (pinned_node.classed('active_node')) {
+    const node_pin = d3.select(elem);
+    const pinned_node = d3.select(elem.parentNode);
+    if (!pinned_node.empty() && pinned_node.classed('active_node')) {
       if (!pinned_node.classed('pinned')) {
         pinned_node.classed('pinned', true);
         console.log('Pinned!');
@@ -247,7 +240,7 @@ export class GraphNodes {
       } else {
         pinned_node.classed('pinned', false);
         console.log('Unpinned!');
-        node_pin.attr('fill', this.graphNodes.node_color);
+        node_pin.attr('fill', () => this.getNodeColor(data));
       }
     }
   }
@@ -258,10 +251,10 @@ export class GraphNodes {
     const value_list = d3.selectAll('.node').data();
     if (prop_name === 'none') {
       d3.selectAll('.base_circle').style('fill', (d) => {
-        return this.default_node_color
+        return this.getNodeColor(d);
       });
       d3.selectAll('.Pin').style('fill', (d) => {
-        return this.default_node_color;
+        return this.getNodeColor(d);
       });
     } else if (prop_name === 'label') {
       const value_set = new Set(value_list.map((d) => {
@@ -269,10 +262,10 @@ export class GraphNodes {
       }));
       node_code_color = d3.scaleOrdinal().domain(value_set).range(d3.range(0, value_set.size));
       d3.selectAll('.base_circle').style('fill', (d) => {
-        return this.colorPalette(node_code_color(d.label));
+        return this.config.colorPalette(node_code_color(d.label));
       });
       d3.selectAll('.Pin').style('fill', (d) => {
-        return this.colorPalette(node_code_color(d.label));
+        return this.config.colorPalette(node_code_color(d.label));
       });
     } else {
       const value_set = new Set(value_list.map((d) => {
@@ -283,37 +276,37 @@ export class GraphNodes {
       node_code_color = d3.scaleOrdinal().domain(value_set).range(d3.range(0, value_set.size));
       d3.selectAll('.base_circle').style('fill', (d) => {
         if (typeof d.properties[prop_name] !== 'undefined') {
-          return this.colorPalette(node_code_color(d.properties[prop_name][0].value));
+          return this.config.colorPalette(node_code_color(d.properties[prop_name][0].value));
         }
-        return this.node_color(d);
+        return this.getNodeColor(d);
       });
       d3.selectAll('.Pin').style('fill', (d) => {
         if (typeof d.properties[prop_name] !== 'undefined') {
-          return this.colorPalette(node_code_color(d.properties[prop_name][0].value));
+          return this.config.colorPalette(node_code_color(d.properties[prop_name][0].value));
         }
-        return this.node_color(d);
+        return this.getNodeColor(d);
       });
     }
   }
 
-  node_size(d) {
+  getNodeSize(d) {
     if ('size' in d) {
       return d.size;
     } else {
-      return this.default_node_size;
+      return this.config.default_node_size;
     }
   }
 
-  node_stroke_width(d) {
+  getNodeStrokeWidth(d) {
     if ('stroke_width' in d) {
       return d.stroke_width;
     } else {
-      return this.default_stroke_width;
+      return this.config.default_stroke_width;
     }
   }
 
-  node_color(d) {
-    return this.default_node_color;
+  getNodeColor(d) {
+    return this.config.default_node_color;
     /*
     if (colored_prop !== 'none') {
       if (colored_prop === 'label') {
@@ -336,7 +329,7 @@ export class GraphNodes {
     } */
   }
 
-  node_title(d) {
+  getNodeTitle(d) {
     if ('node_title' in d) {
       return d.node_title;
     } else {
@@ -344,7 +337,7 @@ export class GraphNodes {
     }
   }
 
-  node_text(d) {
+  getNodeText(d) {
     if ('node_text' in d) {
       return d.node_text;
     } else {
@@ -352,7 +345,7 @@ export class GraphNodes {
     }
   }
 
-  node_subtext(d) {
+  getNodeSubText(d) {
     if ('node_subtext' in d) {
       return d.node_subtext;
     } else {

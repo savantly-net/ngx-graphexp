@@ -62,7 +62,7 @@ export class GraphexpService {
       gremlin_query = gremlin_query_nodes + '\n' + gremlin_query_edges + '\n' + '[nodes.toList(),edges.toList()]';
 
     } else {
-      let has_str = `has('${input_field}', '${filtered_string})'`;
+      let has_str = `has('${input_field}', '${filtered_string}')`;
       if (this.isInt(input_string)) {
         has_str = `has('${input_field}', ${filtered_string})`;
       }

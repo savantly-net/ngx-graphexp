@@ -4,18 +4,15 @@ import * as d3 from 'd3';
 
 export class GraphLinks {
 
-  // Edges
-  default_edge_stroke_width = 3;
-  default_edge_color = '#CCC';
-  edge_label_color = '#111';
-
-  color_palette: (item: any) => any = d3.scaleOrdinal(d3.schemeCategory20);
+  get config() {
+    return this.graphViz.config;
+  }
 
   get graphRoot() {
     return this.graphViz.graphRoot;
   }
 
-  get links_data() {
+  get linkModels() {
     return this.graphViz.linkModels;
   }
 
@@ -23,67 +20,47 @@ export class GraphLinks {
     return this.graphViz.nodeModels;
   }
 
-  get links() {
-    const all_links = this.graphRoot.selectAll('.active_edge')
-      .data(this.links_data, (n) => {
-        return n.id;
-      });
-    return all_links;
+  get selectLinks() {
+    return this.graphViz.selectLinks;
   }
 
-  get edgePaths() {
-    const all_edgepaths = this.graphRoot.selectAll('.active_edgepath')
-      .data(this.links_data, (n) => {
-        return n.id;
-      });
-    return all_edgepaths;
+  get selectEdgePaths() {
+    return this.graphViz.selectEdgePaths;
   }
 
-  get edgeLabels() {
-    const all_edgelabels = this.graphRoot.selectAll('.active_edgelabel')
-      .data(this.links_data, (n) => {
-        return n.id;
-      });
-    return all_edgelabels;
+  get selectEdgeLabels() {
+    return this.graphViz.selectEdgeLabels;
   }
 
-  /**
-  * get all active nodes in the graph
-  */
-  get graphNodes() {
-    // Existing active nodes
-    const allNodes = this.graphRoot.selectAll('g').filter('.active_node')
-      .data(this.nodeModels, (n) => {
-        return n.id;
-      });
-    return allNodes;
+  get selectGraphNodes() {
+    return this.graphViz.selectGraphNodes;
   }
 
   update(arrangedData: ArrangedGraphData) {
 
     // links not active anymore are classified old_links
-    this.links.exit().classed('old_edge0', true).classed('active_edge', false);
-    this.edgePaths.exit().classed('old_edgepath0', true).classed('active_edgepath', false);
-    this.edgeLabels.exit().classed('old_edgelabel0', true).classed('active_edgelabel', false);
+    this.selectLinks.exit().classed('old_edge0', true).classed('active_edge', false);
+    this.selectEdgePaths.exit().classed('old_edgepath0', true).classed('active_edgepath', false);
+    this.selectEdgeLabels.exit().classed('old_edgelabel0', true).classed('active_edgelabel', false);
 
 
     // handling active links associated to the data
-    const edgepaths_e = this.edgePaths.enter(),
-      edgelabels_e = this.edgeLabels.enter(),
-      link_e = this.links.enter();
-    const decor_out = this.decorate_link(link_e, edgepaths_e, edgelabels_e);
+    const edgepaths_e = this.selectEdgePaths.enter(),
+      edgelabels_e = this.selectEdgeLabels.enter(),
+      link_e = this.selectLinks.enter();
+    const decor_out = this.decorate(link_e, edgepaths_e, edgelabels_e);
 
     const links = decor_out[0], edgepaths = decor_out[1],
       edgelabels = decor_out[2];
 
     // previous links plus new links are merged
-    links.merge(this.links);
-    edgepaths.merge(this.edgePaths);
-    edgelabels.merge(this.edgeLabels);
+    links.merge(this.selectLinks);
+    edgepaths.merge(this.selectEdgePaths);
+    edgelabels.merge(this.selectEdgeLabels);
   }
 
   tick() {
-    this.links
+    this.selectLinks
       .attr('x1', function(d) {
         return d.source.x;
       })
@@ -97,11 +74,11 @@ export class GraphLinks {
         return d.target.y;
       });
 
-    this.edgePaths.attr('d', function(d) {
+    this.selectEdgePaths.attr('d', function(d) {
       return 'M ' + d.source.x + ' ' + d.source.y + ' L ' + d.target.x + ' ' + d.target.y;
     });
 
-    this.edgeLabels.attr('transform', function(d) {
+    this.selectEdgeLabels.attr('transform', function(d) {
       if (d.target.x < d.source.x) {
         const bbox = this.getBBox();
 
@@ -114,17 +91,15 @@ export class GraphLinks {
     });
   }
 
-
-
-  edge_stroke_width(d) {
+  getStrokeWidth(d) {
     if ('stroke_width' in d) {
       return d.stroke_width;
     } else {
-      return this.default_edge_stroke_width;
+      return this.config.default_edge_stroke_width;
     }
   }
 
-  edge_text(d) {
+  getEdgeText(d) {
     if ('text' in d) {
       return d.text;
     } else {
@@ -132,17 +107,16 @@ export class GraphLinks {
     }
   }
 
-  edge_color(d) {
+  getEdgeColor(d) {
     if ('color' in d) {
       return d.color;
     } else {
-      return this.default_edge_color;
+      return this.config.default_edge_color;
     }
   }
 
 
-  decorate_link(edges, edgepaths, edgelabels) {
-
+  decorate(edges, edgepaths, edgelabels) {
     const edges_deco = edges.append('line').attr('class', 'edge').classed('active_edge', true)
       .attr('source_ID', function(d) {
         return d.source;
@@ -154,19 +128,18 @@ export class GraphLinks {
         return d.id;
       });
 
-
-    this.create_arrows(edges_deco);
+    this.createMarkers(edges_deco);
     // Attach the arrows
     edges_deco.attr('marker-end', function(d) {
       return 'url(#marker_' + d.id + ')'
     })
-      .attr('stroke-width', this.edge_stroke_width)
+      .attr('stroke-width', (d) => this.getStrokeWidth(d))
       .append('title').text(function(d) {
         return d.properties.weight;
       });
 
     // Attach the edge labels
-    const e_label = this.create_edge_label(edgepaths, edgelabels);
+    const e_label = this.createEdgeLabels(edgepaths, edgelabels);
     const edgepaths_deco = e_label[0];
     const edgelabels_deco = e_label[1];
 
@@ -184,11 +157,11 @@ export class GraphLinks {
 
 
     // Attach the edge actions
-    this.attach_edge_actions(edges_deco)
+    this.attachEdgeEvents(edges_deco)
 
 
     // Add property info if checkbox checked
-    this.add_checkbox_prop('edges', edgelabels_deco)
+    this.addEnabledProperties('edges', edgelabels_deco)
 
     return [edges_deco, edgepaths_deco, edgelabels_deco]
 
@@ -204,7 +177,7 @@ export class GraphLinks {
     }
   }
 
-  create_arrows(edge_in) {
+  createMarkers(edge_in) {
     const edge_data = edge_in.data();
     const arrow_data = this.graphRoot.selectAll('.arrow').data();
     const data = arrow_data.concat(edge_data);
@@ -221,16 +194,16 @@ export class GraphLinks {
       .attr('orient', 'auto')
       .attr('refX', (d) => {
         const node = this.nodeModelById(d.target);
-        return this.graphNodes.node_size(node) + this.graphNodes.node_stroke_width(node);
+        return this.graphViz.graphNodes.getNodeSize(node) + this.graphViz.graphNodes.getNodeStrokeWidth(node);
       })
       .attr('refY', 0)
       .attr('viewBox', '0 -5 10 10')
       .append('svg:path')
       .attr('d', 'M0,-5L10,0L0,5')
-      .style('fill', (d) => {return this.links.edge_color(d)});
+      .style('fill', (d) => {return this.getEdgeColor(d)});
   }
 
-  add_checkbox_prop(item, selected_items) {
+  addEnabledProperties(item, selected_items) {
     // Add text from a property if the checkbox is checked on the sidebar
     const item_properties = [];
     if (item === 'edges') {
@@ -243,12 +216,12 @@ export class GraphLinks {
       const prop_name = item_properties[prop_idx];
       const prop_id_nb = prop_idx;
       const prop_id = item + '_' + prop_name;
-      this.graphViz.attach_property(selected_items, prop_name, prop_id_nb, item);
+      this.graphViz.attachEnabledProperties(selected_items, prop_name, prop_id_nb, item);
     }
   }
 
 
-  create_edge_label(edgepaths, edgelabels) {
+  createEdgeLabels(edgepaths, edgelabels) {
     const edgepaths_deco = edgepaths.append('path')
       .attr('class', 'edgepath').classed('active_edgepath', true)
       .attr('fill-opacity', 0)
@@ -272,14 +245,14 @@ export class GraphLinks {
         return d.id;
       })
       .attr('font-size', 10)
-      .attr('fill', this.edge_label_color);
+      .attr('fill', this.config.edge_label_color);
 
     return [edgepaths_deco, edgelabels_deco];
 
 
   }
 
-  attach_edge_actions(edge) {
+  attachEdgeEvents(edge) {
     edge.on('mouseover', (theEdge, index, elements) => {
       console.log('mouse over!!');
       const line = elements[index];

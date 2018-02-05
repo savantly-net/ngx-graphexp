@@ -5,18 +5,17 @@ import * as d3 from 'd3';
 export class GraphLayers {
   // Submodule that handles layers of visualization
 
-  nb_layers = 3;
   old_Nodes: D3Node[] = [];
   old_Links: D3Node[] = [];
   _Nodes: D3Node[] = [];
   _Links: D3Node[] = [];
 
-  set_nb_layers(nb) {
-    this.nb_layers = nb;
+  depth() {
+    return this.config.numberOfLayers;
   }
 
-  depth() {
-    return this.nb_layers;
+  get config() {
+    return this.graphViz.config;
   }
 
   get nodes() {
@@ -33,7 +32,7 @@ export class GraphLayers {
   push_layers() {
     // old links and nodes become older
     // and are moved to the next deeper layer
-    for (let k = this.nb_layers; k > 0; k--) {
+    for (let k = this.config.numberOfLayers; k > 0; k--) {
       const kp = k - 1;
       this._svg.selectAll('.old_edge' + kp).classed('old_edge' + k, true);
       this._svg.selectAll('.old_node' + kp).classed('old_node' + k, true);
@@ -147,7 +146,7 @@ export class GraphLayers {
     // A node or an edge can not be on several layers at the same time.
     d3.selectAll(elem_class).each((d) => {
       const ID = d.id;
-      for (let n = 0; n < this.nb_layers; n++) {
+      for (let n = 0; n < this.config.numberOfLayers; n++) {
         const list_old_elements = d3.selectAll(elem_class_old + n);
         // list_old_nodes_data = list_old_nodes.data();
         list_old_elements.each((od) => {

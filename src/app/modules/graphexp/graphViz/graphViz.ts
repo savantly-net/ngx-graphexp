@@ -1,6 +1,7 @@
 import {GraphLayers} from './graphLayers';
 import {GraphShapes} from './graphShapes';
 import {GraphexpService, GraphsonFormat, ArrangedGraphData} from '../graphexp.service';
+import {GraphConfig} from './graphConfig';
 import {GraphLinks} from './graphLinks';
 import {GraphNodes} from './graphNodes';
 import * as d3 from 'd3';
@@ -12,17 +13,16 @@ export class GraphViz {
   private _graphWidth = 0;
   private _graphHeight = 0;
   private _simulation: any = {};
-  private force_strength = -600;
-  private link_strength = 0.2;
-  private force_x_strength = 0.1;
-  private force_y_strength = 0.1;
   private _graphLayers: GraphLayers;
-  private graphShapes: GraphShapes;
-  private graphNodes: GraphNodes;
-  private graphLinks: GraphLinks;
+  private _graphShapes: GraphShapes;
+  private _graphNodes: GraphNodes;
+  private _graphLinks: GraphLinks;
 
   public selectedNode: BehaviorSubject<any> = new BehaviorSubject<any>(null);
 
+  get config() {
+    return this._config;
+  }
   get simulation() {
     return this._simulation;
   }
@@ -39,8 +39,48 @@ export class GraphViz {
     return this._graphLayers;
   }
 
+  get graphNodes() {
+    return this._graphNodes;
+  }
+
   get linkModels() {
     return this._graphLayers._Links;
+  }
+
+  get selectLinks() {
+    const all_links = this.graphRoot.selectAll('.active_edge')
+      .data(this.linkModels, (n) => {
+        return n.id;
+      });
+    return all_links;
+  }
+
+  get selectEdgePaths() {
+    const all_edgepaths = this.graphRoot.selectAll('.active_edgepath')
+      .data(this.linkModels, (n) => {
+        return n.id;
+      });
+    return all_edgepaths;
+  }
+
+  get selectEdgeLabels() {
+    const all_edgelabels = this.graphRoot.selectAll('.active_edgelabel')
+      .data(this.linkModels, (n) => {
+        return n.id;
+      });
+    return all_edgelabels;
+  }
+
+  /**
+  * get all active nodes in the graph
+  */
+  get selectGraphNodes() {
+    // Existing active nodes
+    const allNodes = this.graphRoot.selectAll('g').filter('.active_node')
+      .data(this.nodeModels, (n) => {
+        return n.id;
+      });
+    return allNodes;
   }
 
 
@@ -71,19 +111,19 @@ export class GraphViz {
     return svg.append('g');
   }
 
-  simulation_start(center_f) {
+  simulationStart(center_f) {
     let force_x, force_y;
     this.
       // Define the force applied to the nodes
       _simulation = d3.forceSimulation()
-        .force('charge', d3.forceManyBody().strength(this.force_strength))
-        .force('link', d3.forceLink().strength(this.link_strength).id((d) => {
+        .force('charge', d3.forceManyBody().strength(this._config.force_strength))
+        .force('link', d3.forceLink().strength(this._config.link_strength).id((d) => {
           return d.id;
         }));
 
     if (center_f === 1) {
-      force_y = this.force_x_strength;
-      force_x = this.force_y_strength;
+      force_y = this._config.force_x_strength;
+      force_x = this._config.force_y_strength;
       this._simulation.force('center', d3.forceCenter(this._graphWidth / 2, this._graphHeight / 2));
     } else {
       force_y = 0;
@@ -99,21 +139,19 @@ export class GraphViz {
   }
 
 
-
-  //////////////////////////////////////
-  refresh_data(arrangedData: ArrangedGraphData, center_f, with_active_node) {
+  refreshData(arrangedData: ArrangedGraphData, center_f, with_active_node) {
     // Main visualization function
     const svg_graph = this.graphRoot;
     this._graphLayers.push_layers();
     this._graphLayers.update_data(arrangedData);
 
-    this.graphLinks.update(arrangedData);
+    this._graphLinks.update(arrangedData);
 
-    this.graphNodes.update(arrangedData);
+    this._graphNodes.update(arrangedData);
 
     //////////////////////////////////
     // Additional clean up
-    this.graphShapes.decorate_old_elements(this._graphLayers.depth());
+    this._graphShapes.decorate_old_elements(this._graphLayers.depth());
     svg_graph.selectAll('g').filter('.pinned').moveToFront();
 
 
@@ -124,17 +162,17 @@ export class GraphViz {
 
 
     // Force simulation simulation model and paramers Associate the simulation with the data
-    this._simulation = this.simulation_start(center_f);
+    this._simulation = this.simulationStart(center_f);
     this._simulation.nodes(this.nodeModels).on('tick', () => {
-      this.graphNodes.tick();
-      this.graphLinks.tick();
+      this._graphNodes.tick();
+      this._graphLinks.tick();
     });
     this._simulation.force('link').links(this.linkModels);
     this._simulation.alphaTarget(0);
 
   }
 
-  display_prop(prop) {
+  displayShapeProperty(prop) {
     const prop_id = prop.id;
     const prop_id_nb = prop.getAttribute('id_nb');
     const text_base_offset = 10;
@@ -149,7 +187,7 @@ export class GraphViz {
       } else if (item === 'edges') {
         elements_text = d3.selectAll('.edgelabel');
       }
-      this.attach_property(elements_text, prop_name, prop_id_nb, item);
+      this.attachEnabledProperties(elements_text, prop_name, prop_id_nb, item);
     } else {
       if (item === 'nodes') {
         d3.selectAll('.node').select('.' + prop_id).remove();
@@ -161,7 +199,7 @@ export class GraphViz {
   }
 
 
-  attach_property(graph_objects, prop_name, prop_id_nb, item) {
+  attachEnabledProperties(graph_objects, prop_name, prop_id_nb, item) {
     let elements_text;
     const text_base_offset = 10;
     const text_offset = 10;
@@ -181,21 +219,21 @@ export class GraphViz {
     }
     elements_text.classed('prop_details', true).classed(prop_id, true)
       .attr('dy', (d) => {
-        return this.graphNodes.node_size(d) + text_base_offset + text_offset * parseInt(prop_id_nb, 10);
+        return this._graphNodes.getNodeSize(d) + text_base_offset + text_offset * parseInt(prop_id_nb, 10);
       })
       // .attr("y", ".31em")
       .text((d) => {
-        return this.get_prop_value(d, prop_name, item);
+        return this.getPropertyValue(d, prop_name, item);
       });
   }
 
 
-  get_prop_value(d, prop_name, item) {
+  getPropertyValue(d, prop_name, item) {
     if (prop_name in d.properties) {
       if (item === 'nodes') {
-        if (this.format === GraphsonFormat.GraphSON3) {
+        if (this._config.format === GraphsonFormat.GraphSON3) {
           return d.properties[prop_name]['summary'];
-        } else if (this.format === GraphsonFormat.GraphSON1) {
+        } else if (this._config.format === GraphsonFormat.GraphSON1) {
           return d.properties[prop_name][0].value;
         }
       } else if (item === 'edges') {
@@ -208,7 +246,7 @@ export class GraphViz {
   }
 
   colorize(data) {
-    this.graphNodes.colorize(data);
+    this._graphNodes.colorize(data);
   }
 
   displayInfo(data) {
@@ -217,7 +255,7 @@ export class GraphViz {
 
   loadRelatedNodes(d) {
     this.graphexpService.getRelatedNodes(d).then((arrangedData) => {
-      this.refresh_data(arrangedData, 1, null);
+      this.refreshData(arrangedData, 1, null);
       this.displayInfo(d);
     });
   }
@@ -233,10 +271,12 @@ export class GraphViz {
     this._graphRoot = svg;
 
     this._graphLayers = new GraphLayers(this);
-    this.graphShapes = new GraphShapes(this.format, this, this.graphexpService);
-    this.graphNodes = new GraphNodes(this);
-    this.graphLinks = new GraphLinks(this);
+    this._graphShapes = new GraphShapes(this._config.format, this, this.graphexpService);
+    this._graphNodes = new GraphNodes(this);
+    this._graphLinks = new GraphLinks(this);
   }
 
-  constructor(public graphexpService: GraphexpService, private format: GraphsonFormat) {}
+  constructor(
+    public graphexpService: GraphexpService,
+    private _config: GraphConfig) {}
 }
