@@ -1,3 +1,4 @@
+import { D3Node } from './nodes/d3Node';
 import {Injectable} from '@angular/core';
 import {GremlinService, GremlinClientOptions, GremlinQuery, GremlinQueryResponse} from '@savantly/gremlin-js';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
@@ -9,8 +10,8 @@ export enum GraphsonFormat {
 }
 
 export class ArrangedGraphData {
-  nodes: any[];
-  links: any[];
+  nodes: D3Node[];
+  links: D3Node[];
 }
 
 @Injectable()
@@ -73,9 +74,9 @@ export class GraphexpService {
     }
     console.log(gremlin_query);
     return new Promise<ArrangedGraphData>((resolve, reject) => {
-       this.executeQuery(gremlin_query).then(response => {
+      this.executeQuery(gremlin_query).then(response => {
         resolve(this.arrangeData(response.data));
-       }, error => {reject(error)})
+      }, error => {reject(error)})
     });
   }
 
@@ -86,8 +87,12 @@ export class GraphexpService {
     }
     const gremlin_query_nodes = `nodes = g.V(${id}).as('node').both().as('node').select(all,'node').inject(g.V(${id})).unfold()`;
     const gremlin_query_edges = `edges = g.V(${id}).bothE()`;
-    const gremlin_query = gremlin_query_nodes + `\n'+gremlin_query_edges+'\n'+'[nodes.toList(),edges.toList()]`;
-    return this.executeQuery(gremlin_query);
+    const gremlin_query = `${gremlin_query_nodes}\n ${gremlin_query_edges}\n[nodes.toList(),edges.toList()]`;
+    return new Promise<ArrangedGraphData>((resolve, reject) => {
+      this.executeQuery(gremlin_query).then(response => {
+        resolve(this.arrangeData(response.data));
+      }, error => {reject(error)})
+    });
   }
 
   handleGraphInfo(data) {
@@ -173,7 +178,7 @@ export class GraphexpService {
     }
     return data;
   }
-  arrangeData(data) {
+  arrangeData(data): ArrangedGraphData {
     if (this.COMMUNICATION_METHOD === GraphsonFormat.GraphSON3) {
       data = this.graphson3to1(data);
       return this.arrange_datav3(data);
@@ -182,7 +187,7 @@ export class GraphexpService {
     }
   }
 
-  arrange_datav3(data): {nodes: any[], links: any[]} {
+  arrange_datav3(data): ArrangedGraphData {
     // Extract node and edges from the data returned for 'search' and 'click' request
     // Create the graph object
     const nodes = [], links = [];
@@ -200,7 +205,7 @@ export class GraphexpService {
     }
     return {nodes: nodes, links: links};
   }
-  arrange_datav2(data: any): {nodes: any[], links: any[]} {
+  arrange_datav2(data: any): ArrangedGraphData {
     // Extract node and edges from the data returned for 'search' and 'click' request
     // Create the graph object
     const nodes = [], links = [];
@@ -273,8 +278,8 @@ export class GraphexpService {
     return null;
   }
 
-  updateSelection(data) {
-
+  updateSelection(edge: D3Node) {
+    console.log('graphexpService#updateSelection: edge selected: ' + edge.id);
   }
 
   constructor(options: any) {

@@ -1,0 +1,390 @@
+[
+	[
+		{
+			"id": 4192,
+			"label": "monster",
+			"type": "vertex",
+			"properties": {
+				"name": [
+					{
+						"id": "170-38g-sl",
+						"value": "cerberus"
+					}
+				]
+			}
+		},
+		{
+			"id": 4272,
+			"label": "human",
+			"type": "vertex",
+			"properties": {
+				"name": [
+					{
+						"id": "17a-3ao-sl",
+						"value": "alcmene"
+					}
+				],
+				"age": [
+					{
+						"id": "1li-3ao-35x",
+						"value": 45
+					}
+				]
+			}
+		},
+		{
+			"id": 4296,
+			"label": "monster",
+			"type": "vertex",
+			"properties": {
+				"name": [
+					{
+						"id": "17d-3bc-sl",
+						"value": "hydra"
+					}
+				]
+			}
+		},
+		{
+			"id": 4304,
+			"label": "location",
+			"type": "vertex",
+			"properties": {
+				"name": [
+					{
+						"id": "17e-3bk-sl",
+						"value": "sky"
+					}
+				]
+			}
+		},
+		{
+			"id": 8400,
+			"label": "god",
+			"type": "vertex",
+			"properties": {
+				"name": [
+					{
+						"id": "2e2-6hc-sl",
+						"value": "pluto"
+					}
+				],
+				"age": [
+					{
+						"id": "2sa-6hc-35x",
+						"value": 4000
+					}
+				]
+			}
+		},
+		{
+			"id": 12496,
+			"label": "location",
+			"type": "vertex",
+			"properties": {
+				"name": [
+					{
+						"id": "3yy-9n4-sl",
+						"value": "tartarus"
+					}
+				]
+			}
+		},
+		{
+			"id": 4320,
+			"label": "titan",
+			"type": "vertex",
+			"properties": {
+				"name": [
+					{
+						"id": "17g-3c0-sl",
+						"value": "saturn"
+					}
+				],
+				"age": [
+					{
+						"id": "1lo-3c0-35x",
+						"value": 10000
+					}
+				]
+			}
+		},
+		{
+			"id": 8416,
+			"label": "location",
+			"type": "vertex",
+			"properties": {
+				"name": [
+					{
+						"id": "2sc-6hs-sl",
+						"value": "sea"
+					}
+				]
+			}
+		},
+		{
+			"id": 4328,
+			"label": "god",
+			"type": "vertex",
+			"properties": {
+				"name": [
+					{
+						"id": "17h-3c8-sl",
+						"value": "jupiter"
+					}
+				],
+				"age": [
+					{
+						"id": "1lp-3c8-35x",
+						"value": 5000
+					}
+				]
+			}
+		},
+		{
+			"id": 8424,
+			"label": "god",
+			"type": "vertex",
+			"properties": {
+				"name": [
+					{
+						"id": "2sd-6i0-sl",
+						"value": "neptune"
+					}
+				],
+				"age": [
+					{
+						"id": "36l-6i0-35x",
+						"value": 4500
+					}
+				]
+			}
+		},
+		{
+			"id": 12520,
+			"label": "demigod",
+			"type": "vertex",
+			"properties": {
+				"name": [
+					{
+						"id": "4d9-9ns-sl",
+						"value": "hercules"
+					}
+				],
+				"age": [
+					{
+						"id": "4rh-9ns-35x",
+						"value": 30
+					}
+				]
+			}
+		},
+		{
+			"id": 16616,
+			"label": "monster",
+			"type": "vertex",
+			"properties": {
+				"name": [
+					{
+						"id": "5y5-ctk-sl",
+						"value": "nemean"
+					}
+				]
+			}
+		}
+	],
+	[
+		{
+			"id": "1l8-38g-b2t-9n4",
+			"label": "lives",
+			"type": "edge",
+			"inVLabel": "location",
+			"outVLabel": "monster",
+			"inV": 12496,
+			"outV": 4192
+		},
+		{
+			"id": "55m-6hc-b2t-9n4",
+			"label": "lives",
+			"type": "edge",
+			"inVLabel": "location",
+			"outVLabel": "god",
+			"inV": 12496,
+			"outV": 8400,
+			"properties": {
+				"reason": "no fear of death"
+			}
+		},
+		{
+			"id": "5ju-6hc-bv9-38g",
+			"label": "pet",
+			"type": "edge",
+			"inVLabel": "monster",
+			"outVLabel": "god",
+			"inV": 4192,
+			"outV": 8400
+		},
+		{
+			"id": "4d6-6hc-cnp-3c8",
+			"label": "brother",
+			"type": "edge",
+			"inVLabel": "god",
+			"outVLabel": "god",
+			"inV": 4328,
+			"outV": 8400
+		},
+		{
+			"id": "4re-6hc-cnp-6i0",
+			"label": "brother",
+			"type": "edge",
+			"inVLabel": "god",
+			"outVLabel": "god",
+			"inV": 8424,
+			"outV": 8400
+		},
+		{
+			"id": "6cd-3c8-7x1-3c0",
+			"label": "father",
+			"type": "edge",
+			"inVLabel": "titan",
+			"outVLabel": "god",
+			"inV": 4320,
+			"outV": 4328
+		},
+		{
+			"id": "6ql-3c8-b2t-3bk",
+			"label": "lives",
+			"type": "edge",
+			"inVLabel": "location",
+			"outVLabel": "god",
+			"inV": 4304,
+			"outV": 4328,
+			"properties": {
+				"reason": "loves fresh breezes"
+			}
+		},
+		{
+			"id": "7j1-3c8-cnp-6hc",
+			"label": "brother",
+			"type": "edge",
+			"inVLabel": "god",
+			"outVLabel": "god",
+			"inV": 8400,
+			"outV": 4328
+		},
+		{
+			"id": "74t-3c8-cnp-6i0",
+			"label": "brother",
+			"type": "edge",
+			"inVLabel": "god",
+			"outVLabel": "god",
+			"inV": 8424,
+			"outV": 4328
+		},
+		{
+			"id": "7x9-6i0-b2t-6hs",
+			"label": "lives",
+			"type": "edge",
+			"inVLabel": "location",
+			"outVLabel": "god",
+			"inV": 8416,
+			"outV": 8424,
+			"properties": {
+				"reason": "loves waves"
+			}
+		},
+		{
+			"id": "8bh-6i0-cnp-3c8",
+			"label": "brother",
+			"type": "edge",
+			"inVLabel": "god",
+			"outVLabel": "god",
+			"inV": 4328,
+			"outV": 8424
+		},
+		{
+			"id": "8pp-6i0-cnp-6hc",
+			"label": "brother",
+			"type": "edge",
+			"inVLabel": "god",
+			"outVLabel": "god",
+			"inV": 8400,
+			"outV": 8424
+		},
+		{
+			"id": "93x-9ns-7x1-3c8",
+			"label": "father",
+			"type": "edge",
+			"inVLabel": "god",
+			"outVLabel": "demigod",
+			"inV": 4328,
+			"outV": 12520
+		},
+		{
+			"id": "9i5-9ns-8ph-3ao",
+			"label": "mother",
+			"type": "edge",
+			"inVLabel": "human",
+			"outVLabel": "demigod",
+			"inV": 4272,
+			"outV": 12520
+		},
+		{
+			"id": "aot-9ns-9hx-38g",
+			"label": "battled",
+			"type": "edge",
+			"inVLabel": "monster",
+			"outVLabel": "demigod",
+			"inV": 4192,
+			"outV": 12520,
+			"properties": {
+				"place": {
+					"type": "Point",
+					"coordinates": [
+						22.0,
+						39.0
+					]
+				},
+				"time": 12
+			}
+		},
+		{
+			"id": "aal-9ns-9hx-3bc",
+			"label": "battled",
+			"type": "edge",
+			"inVLabel": "monster",
+			"outVLabel": "demigod",
+			"inV": 4296,
+			"outV": 12520,
+			"properties": {
+				"place": {
+					"type": "Point",
+					"coordinates": [
+						23.899999618530273,
+						37.70000076293945
+					]
+				},
+				"time": 2
+			}
+		},
+		{
+			"id": "9wd-9ns-9hx-ctk",
+			"label": "battled",
+			"type": "edge",
+			"inVLabel": "monster",
+			"outVLabel": "demigod",
+			"inV": 16616,
+			"outV": 12520,
+			"properties": {
+				"time": 1,
+				"place": {
+					"type": "Point",
+					"coordinates": [
+						23.700000762939453,
+						38.099998474121094
+					]
+				}
+			}
+		}
+	]
+]

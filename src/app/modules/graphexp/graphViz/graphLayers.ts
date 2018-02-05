@@ -1,3 +1,4 @@
+import { D3Node } from '../nodes/d3Node';
 import { GraphViz } from './graphViz';
 import * as d3 from 'd3';
 
@@ -5,10 +6,10 @@ export class GraphLayers {
   // Submodule that handles layers of visualization
 
   nb_layers = 3;
-  old_Nodes = [];
-  old_Links = [];
-  _Nodes = [];
-  _Links = [];
+  old_Nodes: D3Node[] = [];
+  old_Links: D3Node[] = [];
+  _Nodes: D3Node[] = [];
+  _Links: D3Node[] = [];
 
   set_nb_layers(nb) {
     this.nb_layers = nb;
@@ -26,7 +27,7 @@ export class GraphLayers {
   }
 
   get _svg() {
-    return this.graphViz._svg;
+    return this.graphViz.graphRoot;
   }
 
   push_layers() {
@@ -46,7 +47,7 @@ export class GraphLayers {
     this.old_Links = [];
   }
 
-  update_data(d: {nodes: any[], links: any[] }) {
+  update_data(d: {nodes: D3Node[], links: D3Node[] }) {
     // Save the data
     const previous_nodes = this._svg.selectAll('g').filter('.active_node');
     const previous_nodes_data = previous_nodes.data();
@@ -70,7 +71,7 @@ export class GraphLayers {
 
   }
 
-  updateAdd(array1, array2) {
+  updateAdd(array1: D3Node[], array2: D3Node[]) {
     // Update lines of array1 with the ones of array2 when the elements' id match
     // and add elements of array2 to array1 when they do not exist in array1
     const arraytmp = array2.slice(0);
@@ -91,17 +92,16 @@ export class GraphLayers {
     return array1.concat(arraytmp);
   }
 
-  find_active_links(list_of_links, active_nodes) {
+  find_active_links(list_of_links: D3Node[], active_nodes: D3Node[]) {
     // find the links in the list_of_links that are between the active nodes and discard the others
-    let active_links = [];
+    let active_links: D3Node[] = [];
     list_of_links.forEach((row) => {
       for (let i = 0; i < active_nodes.length; i++) {
         for (let j = 0; j < active_nodes.length; j++) {
           if (active_nodes[i].id === row.source.id && active_nodes[j].id === row.target.id) {
-            let L_data = {source: row.source.id, target: row.target.id, type: row.type, value: row.value, id: row.id};
-            L_data = row;
-            L_data['source'] = row.source.id;
-            L_data['target'] = row.target.id;
+            const L_data = new D3Node(row);
+            L_data.source = row.source.id;
+            L_data.target = row.target.id;
             active_links = active_links.concat(L_data);
           } else if (active_nodes[i].id === row.source && active_nodes[j].id === row.target) {
             const L_data = row;

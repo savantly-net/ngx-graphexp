@@ -1,6 +1,6 @@
-import {GraphViz} from './graphViz';
+import {GraphViz} from './graphViz/graphViz';
 import {GraphexpService, GraphsonFormat} from './graphexp.service';
-import {Component, OnInit, Input, AfterViewInit, NgZone, ViewEncapsulation} from '@angular/core';
+import {Component, OnInit, Input, AfterViewInit, ViewEncapsulation} from '@angular/core';
 import {GremlinService, GremlinClientOptions, GremlinQuery} from '@savantly/gremlin-js';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import * as d3 from 'd3';
@@ -25,6 +25,13 @@ export class GraphexpComponent implements AfterViewInit {
   public numberOfLayers = 3;
   private graphViz: GraphViz;
 
+  get selectedNode() {
+    if (this.graphViz && this.graphViz.selectedNode && this.graphViz.selectedNode.value) {
+      return this.graphViz.selectedNode.value;
+    } else {
+      return null;
+    }
+  }
 
   get nodeNames() {
     return this.graphexpService.nodeNames;
@@ -43,8 +50,6 @@ export class GraphexpComponent implements AfterViewInit {
   }
 
   search() {
-    this.zone.run(() => {
-    });
     console.log(`searching field: ${this.searchField}, value: ${this.searchValue}`);
       this.graphexpService.queryNodes(this.searchField, this.searchValue).then(data => {
         this.graphViz.refresh_data(data, 1, null);
@@ -92,6 +97,6 @@ export class GraphexpComponent implements AfterViewInit {
 
   }
 
-  constructor(private zone: NgZone) {}
+  constructor() {}
 
 }

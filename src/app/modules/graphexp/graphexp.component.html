@@ -40,7 +40,10 @@
 			</div>
 		</div>
 		<div class="right_bar">
-				
+			<strong>Selected Node</strong>
+				<div *ngIf="selectedNode">
+					{{selectedNode}}
+				</div>
 		</div>
 		
 		<div class="sv-graphexp" id="sv_graphexp">

@@ -1,6 +1,3 @@
-* {
-	transform-origin: 0px 0px 0px;
-}
 
 .edge {
 	stroke: #999;
@@ -53,6 +50,7 @@
 	fill: none;
 	pointer-events: all;
 }
+
 
 .sv-graphexp-content {
 	padding: 1em;
