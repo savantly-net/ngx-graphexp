@@ -1,2 +1,6 @@
-# ngx-gremlin
-Gremlin client for Angular
+# ngx-graphexp
+GraphExp plugin for Angular
+
+
+
+![example](./examples/example.png)
