@@ -26,6 +26,7 @@ export class GraphexpComponent implements AfterViewInit {
   public graphInfoData: {};
   public numberOfLayers = 3;
   public showGraphInfo = true;
+  public newNode: any = {};
   private graphViz: GraphViz;
 
   get selectedNode() {
@@ -53,6 +54,18 @@ export class GraphexpComponent implements AfterViewInit {
     this.graphViz = new GraphViz(this.graphexpService, this.graphConfig);
     this.graphViz.init('#sv_graphexp');
     this.graphexpService.queryGraphInfo();
+
+    this.graphViz.connectionCreated.subscribe(val => {
+      console.log(`GraphexpComponent#ngAfterViewInit: ${val}`);
+    });
+  }
+
+  createNode() {
+    const props = [];
+    props.push({key: 'name', value: 'jeremy'});
+    this.graphexpService.createNode('titan', props).then(data => {
+    console.log(data);
+    }, err => {console.error(err)});
   }
 
   search() {

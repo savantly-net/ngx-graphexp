@@ -1,10 +1,12 @@
 import {GraphLayers} from './graphLayers';
 import {GraphShapes} from './graphShapes';
 import {GraphexpService, GraphsonFormat, ArrangedGraphData} from '../graphexp.service';
+import { ConnectionCreatedEvent } from './ConnectionCreatedEvent';
 import {GraphConfig} from './graphConfig';
 import {GraphLinks} from './graphLinks';
 import {GraphNodes} from './graphNodes';
 import * as d3 from 'd3';
+import { Observable } from 'rxjs/Observable';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
 export class GraphViz {
@@ -18,7 +20,14 @@ export class GraphViz {
   private _graphNodes: GraphNodes;
   private _graphLinks: GraphLinks;
 
+  dragLine;
+
+  readonly state = {
+    shiftNodeDrag: false
+  };
+
   public selectedNode: BehaviorSubject<any> = new BehaviorSubject<any>(null);
+  public connectionCreated: Observable<ConnectionCreatedEvent>;
 
   get config() {
     return this._config;
@@ -108,7 +117,6 @@ export class GraphViz {
       .call(d3.zoom().scaleExtent([1 / 2, 4]).on('zoom', () => {
         this._graphRoot.attr('transform', d3.event.transform);
       }));
-    return svg.append('g');
   }
 
   simulationStart(center_f) {
@@ -260,20 +268,64 @@ export class GraphViz {
     });
   }
 
+  addSvgDefinitions(svg) {
+    // define arrow markers for graph links
+    const defs = svg.append('svg:defs');
+    defs.append('svg:marker')
+      .attr('id', 'end-arrow')
+      .attr('viewBox', '0 -5 10 10')
+      .attr('refX', '32')
+      .attr('markerWidth', 5)
+      .attr('markerHeight', 5)
+      .attr('orient', 'auto')
+      .append('svg:path')
+      .attr('d', 'M0,-5L10,0L0,5');
+
+    // define arrow markers for leading arrow
+    defs.append('svg:marker')
+      .attr('id', 'mark-end-arrow')
+      .attr('viewBox', '0 -5 10 10')
+      .attr('refX', 7)
+      .attr('markerWidth', 5)
+      .attr('markerHeight', 5)
+      .attr('orient', 'auto')
+      .append('svg:path')
+      .attr('d', 'M0,-5L10,0L0,5');
+  }
 
   init(label) {
-    let svg = d3.select(label).select('svg');
+    this._graphLayers = new GraphLayers(this);
+    this._graphShapes = new GraphShapes(this._config.format, this, this.graphexpService);
+
+    // GraphNodes class init
+    this._graphNodes = new GraphNodes(this);
+    this.connectionCreated = new Observable(observer => {
+      this._graphNodes.connectionCreated.subscribe(val => {
+        if (val != null) {
+          observer.next(val);
+          console.log(`connection created: ${val.source.id} -> ${val.target.id}`);
+        }
+      });
+    });
+
+    this._graphLinks = new GraphLinks(this);
+
+    const svg = d3.select(label).select('svg');
     this._graphWidth = +d3.select(label).node().getBoundingClientRect().width
     this._graphHeight = +d3.select(label).node().getBoundingClientRect().height;
 
-    svg.attr('width', this._graphWidth).attr('height', this._graphHeight);
-    svg = this.addzoom(svg);
-    this._graphRoot = svg;
+    // displayed when dragging between nodes
+    this.dragLine = svg.append('svg:path')
+      .attr('class', 'link drag-line hidden')
+      .attr('d', 'M0,0L0,0')
+      .style('marker-end', 'url(#mark-end-arrow)');
 
-    this._graphLayers = new GraphLayers(this);
-    this._graphShapes = new GraphShapes(this._config.format, this, this.graphexpService);
-    this._graphNodes = new GraphNodes(this);
-    this._graphLinks = new GraphLinks(this);
+    svg.attr('width', this._graphWidth).attr('height', this._graphHeight);
+    this.addSvgDefinitions(svg);
+    this.addzoom(svg);
+
+    // Finally create a root g node for all the nodes/links
+    this._graphRoot = svg.append('g');
   }
 
   constructor(

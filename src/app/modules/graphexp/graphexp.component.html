@@ -17,11 +17,20 @@
 			<input name="searchValue" [(ngModel)]="searchValue" />
 			<button class="mat-raised-button" (click)="search()">Search</button>
 			<button class="mat-raised-button" name="clear" (click)="clearGraph()">Clear</button>
+			<button class="mat-raised-button" (click)="createNode()">Test Create</button>
 			<input type="checkbox" name="Freeze" id="freeze-in" /><label>Freeze</label>
 			<input type="checkbox" name="showName_box" id="showName" (click)="showNames()"/><label>Show Labels</label>
 			<input type="number" id="nbLayers" min="1" max="128" (click)="setNumberOfLayers()" [(ngModel)]="numberOfLayers"><label>Visible Layers</label>
 		</fieldset>
-		
+		<!--
+		<fieldset *ngIf="graphConfig.enableEdit">
+			<legend>Create</legend>
+			<select [(ngModel)]="newNode.label">
+				<option *ngFor="let item of graphConfig.validLabels" [value]="item">{{item}}</option>
+			</select>
+			<button class="mat-raised-button" (click)="createNode()">Search</button>
+		</fieldset>
+		-->
 	</nav>
 	
 	<div class="sv-graphexp-content">

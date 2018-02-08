@@ -1,4 +1,5 @@
 import { D3Node } from './nodes/d3Node';
+import { TinkerNode } from './nodes/tinkerNode';
 import {Injectable} from '@angular/core';
 import {GremlinService, GremlinClientOptions, GremlinQuery, GremlinQueryResponse} from '@savantly/gremlin-js';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
@@ -14,6 +15,11 @@ export class ArrangedGraphData {
   links: D3Node[];
 }
 
+export class KV {
+  key: string;
+  value: string;
+}
+
 @Injectable()
 export class GraphexpService {
 
@@ -25,12 +31,8 @@ export class GraphexpService {
   public edgeProperties = new BehaviorSubject<string[]>([]);
   node_limit_per_request = 50;
 
-  isInt(value) {
-    return !isNaN(value) &&
-      !isNaN(parseInt(value, 10));
-  }
 
-  queryGraphInfo() {
+  public queryGraphInfo() {
     const gremlin_query_nodes = 'nodes = g.V().groupCount().by(label);';
     const gremlin_query_edges = 'edges = g.E().groupCount().by(label);';
     const gremlin_query_nodes_prop = 'nodesprop = g.V().valueMap().select(keys).groupCount();';
@@ -44,7 +46,7 @@ export class GraphexpService {
     });
   }
 
-  queryNodes(field: string, value: string): Promise<ArrangedGraphData> {
+  public queryNodes(field: string, value: string): Promise<ArrangedGraphData> {
     const input_string = value;
     const input_field = field;
     let filtered_string = input_string; // You may add .replace(/\W+/g, ''); to refuse any character not in the alphabet
@@ -80,7 +82,7 @@ export class GraphexpService {
     });
   }
 
-  getRelatedNodes(d: any) {
+  public getRelatedNodes(d: any) {
     let id = d.id;
     if (isNaN(id)) {
       id = `'${id}'`;
@@ -95,7 +97,36 @@ export class GraphexpService {
     });
   }
 
-  handleGraphInfo(data) {
+  public createNode(label: string, properties: KV[]) {
+    const promise = new Promise<TinkerNode>((resolve, reject) => {
+      let propString = '';
+      properties.forEach((kv) => {
+        propString += `, '${kv.key}', '${kv.value}'`;
+      });
+      const gremlin = `vertex = graph.addVertex(label, '${label}'${propString})`;
+      console.log(`executing query: ${gremlin}`);
+      this.executeQuery(gremlin).then(response => {
+        resolve(response.data);
+      }, error => {
+        console.error(error);
+        reject(error);
+      });
+    });
+    return promise;
+  }
+
+  public executeQuery(gremlin: string, bindings?: {}): Promise<GremlinQueryResponse> {
+    const promise = new Promise<GremlinQueryResponse>((resolve, reject) => {
+      const query = this.gremlinService.createQuery(gremlin, bindings);
+      query.onComplete = (response) => {
+        resolve(response);
+      };
+      this.gremlinService.sendMessage(query);
+    });
+    return promise;
+  }
+
+  private handleGraphInfo(data) {
     if (this.COMMUNICATION_METHOD === GraphsonFormat.GraphSON3) {
       data = this.graphson3to1(data);
     }
@@ -111,33 +142,7 @@ export class GraphexpService {
     this.edgeProperties.next(this.make_properties_list(data[3][0]));
   }
 
-  make_properties_list(data: {}) {
-    const prop_dic = {};
-    for (let prop_str of Object.keys(data)) {
-      prop_str = prop_str.replace(/[\[\ \"\'\]]/g, ''); // get rid of symbols [,",',] and spaces
-      const prop_list = prop_str.split(',');
-      for (let prop_idx = 0; prop_idx < prop_list.length; prop_idx++) {
-        prop_dic[prop_list[prop_idx]] = 0;
-      }
-    }
-    const properties_list = [];
-    for (const key of Object.getOwnPropertyNames(prop_dic)) {
-      properties_list.push(key);
-    }
-    return properties_list;
-  }
-
-  public executeQuery(gremlin: string, bindings?: {}): Promise<GremlinQueryResponse> {
-    const promise = new Promise<GremlinQueryResponse>((resolve, reject) => {
-      const query = this.gremlinService.createQuery(gremlin, bindings);
-      query.onComplete = (response) => {
-        resolve(response);
-      };
-      this.gremlinService.sendMessage(query);
-    });
-    return promise;
-  }
-  graphson3to1(data: any) {
+  private graphson3to1(data: any) {
     // Convert data from graphSON v2 format to graphSON v1
     if (!(Array.isArray(data) || ((typeof data === 'object') && (data !== null)))) {
       return data;
@@ -178,7 +183,7 @@ export class GraphexpService {
     }
     return data;
   }
-  arrangeData(data): ArrangedGraphData {
+  private arrangeData(data): ArrangedGraphData {
     if (this.COMMUNICATION_METHOD === GraphsonFormat.GraphSON3) {
       data = this.graphson3to1(data);
       return this.arrange_datav3(data);
@@ -187,7 +192,7 @@ export class GraphexpService {
     }
   }
 
-  arrange_datav3(data): ArrangedGraphData {
+  private arrange_datav3(data): ArrangedGraphData {
     // Extract node and edges from the data returned for 'search' and 'click' request
     // Create the graph object
     const nodes = [], links = [];
@@ -205,7 +210,7 @@ export class GraphexpService {
     }
     return {nodes: nodes, links: links};
   }
-  arrange_datav2(data: any): ArrangedGraphData {
+  private arrange_datav2(data: any): ArrangedGraphData {
     // Extract node and edges from the data returned for 'search' and 'click' request
     // Create the graph object
     const nodes = [], links = [];
@@ -223,7 +228,7 @@ export class GraphexpService {
     return {nodes: nodes, links: links};
   }
 
-  extract_infov2(data) {
+  private extract_infov2(data) {
     const data_dic = {id: data.id, label: data.label, type: data.type, properties: {}, source: null, target: null};
     const prop_dic = data.properties;
     for (const key in prop_dic) {
@@ -238,7 +243,7 @@ export class GraphexpService {
     return data_dic;
   }
 
-  extract_infov3(data) {
+  private extract_infov3(data) {
     const data_dic = {id: data.id, label: data.label, type: data.type, properties: {}, source: null, target: null};
     const prop_dic = data.properties;
     for (const key in prop_dic) {
@@ -259,7 +264,7 @@ export class GraphexpService {
     }
     return data_dic
   }
-  get_vertex_prop_in_list(vertexProperty): any {
+  private get_vertex_prop_in_list(vertexProperty): any {
     const prop_value_list = [];
     for (const key of Object.keys(vertexProperty)) {
       prop_value_list.push(vertexProperty[key]['value']);
@@ -267,7 +272,7 @@ export class GraphexpService {
     return prop_value_list;
   }
 
-  idIndex(list, elem) {
+  private idIndex(list, elem) {
     // find the element in list with id equal to elem
     // return its index or null if there is no
     for (let i = 0; i < list.length; i++) {
@@ -276,6 +281,27 @@ export class GraphexpService {
       }
     }
     return null;
+  }
+
+  private make_properties_list(data: {}) {
+    const prop_dic = {};
+    for (let prop_str of Object.keys(data)) {
+      prop_str = prop_str.replace(/[\[\ \"\'\]]/g, ''); // get rid of symbols [,",',] and spaces
+      const prop_list = prop_str.split(',');
+      for (let prop_idx = 0; prop_idx < prop_list.length; prop_idx++) {
+        prop_dic[prop_list[prop_idx]] = 0;
+      }
+    }
+    const properties_list = [];
+    for (const key of Object.getOwnPropertyNames(prop_dic)) {
+      properties_list.push(key);
+    }
+    return properties_list;
+  }
+
+  private isInt(value) {
+    return !isNaN(value) &&
+      !isNaN(parseInt(value, 10));
   }
 
   updateSelection(edge: D3Node) {

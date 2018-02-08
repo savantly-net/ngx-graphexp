@@ -1,8 +1,15 @@
 import {ArrangedGraphData} from '../graphexp.service';
+import { D3Node } from '../nodes/d3Node';
+import { ConnectionCreatedEvent } from './ConnectionCreatedEvent';
 import {GraphViz} from './graphViz';
 import * as d3 from 'd3';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 export class GraphNodes {
+
+  mouseDownNode: D3Node;
+
+  public connectionCreated: BehaviorSubject<ConnectionCreatedEvent> = new BehaviorSubject<ConnectionCreatedEvent>(null);
 
   get config() {
     return this.graphViz.config;
@@ -19,11 +26,23 @@ export class GraphNodes {
     return this.graphViz.simulation;
   }
 
+  get isShifted() {
+    return window.event['shiftKey'] === true;
+  }
+
   /**
    * get all active nodes in the graph
    */
   get graphNodes() {
     return this.graphViz.selectGraphNodes;
+  }
+
+  mouseXY(relativeNode) {
+    const xy = d3.mouse(relativeNode);
+    return {
+      x: xy[0],
+      y: xy[1]
+    }
   }
 
   /**
@@ -127,10 +146,29 @@ export class GraphNodes {
   }
 
   attachNodeEvents(node) {
+    const _self = this;
     node.call(d3.drag()
-      .on('start', (ev) => {this.dragstarted(ev)})
-      .on('drag', (ev) => {this.dragged(ev)})
-      .on('end', (ev) => {this.dragended(ev)}));
+      .on('start', function(d) {
+        if (_self.isShifted) {
+          _self.dragConnectionStarted(d);
+        } else {
+          _self.dragNodeStarted(d);
+        }
+      })
+      .on('drag', function(d) {
+        if (_self.isShifted) {
+          _self.draggingConnection(d);
+        } else {
+          _self.draggingNode(d);
+        }
+      })
+      .on('end', (ev) => {
+        if (this.isShifted) {
+          this.dragConnectionEnded(ev);
+        } else {
+          this.dragNodeEnded(ev);
+        }
+      }));
 
 
     node.on('click', (ev) => {this.clicked(ev)})
@@ -165,7 +203,11 @@ export class GraphNodes {
   //////////////////////////////////
   // Handling mouse events
 
-  dragstarted(d) {
+  dragConnectionStarted(d) {
+    this.mouseDownNode = d;
+  }
+
+  dragNodeStarted(d) {
     if (!d3.event.active) {
       this.simulation.alphaTarget(0.3).restart();
     }
@@ -173,7 +215,20 @@ export class GraphNodes {
     d.fy = d.y;
   }
 
-  dragged(d) {
+  draggingConnection(d) {
+    // reposition dragged directed edge
+    if (!this.mouseDownNode) {
+      return;
+    }
+    const dragLine = this.graphViz.dragLine.classed('hidden', false);
+    const transform = this.graphRoot.attr('transform');
+    this.graphViz.dragLine
+      .attr('d', `M ${d.x},${d.y} L ${d3.event.x}, ${d3.event.y}`)
+      .attr('transform', transform);
+    console.log('dragging new connection');
+  }
+
+  draggingNode(d) {
     const connected_edges = this.getConnectedEdgesByNodeId(d.id);
     const f_connected_edges = connected_edges.filter('*:not(.active_edge)')
     if (f_connected_edges._groups[0].length === 0) {
@@ -189,7 +244,14 @@ export class GraphNodes {
     }
   }
 
-  dragended(d) {
+  dragConnectionEnded(d) {
+    this.connectionCreated.next({
+      source: this.mouseDownNode,
+      target: d
+    });
+  }
+
+  dragNodeEnded(d) {
     if (!d3.event.active) {
       this.simulation.alphaTarget(0);
     }

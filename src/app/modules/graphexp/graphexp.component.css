@@ -1,3 +1,10 @@
+path.drag-line {
+    fill: none;
+    stroke: #333;
+    stroke-width: 4px;
+    stroke-dasharray: 5 5;
+    cursor: default;
+}
 
 .edge {
 	stroke: #999;
