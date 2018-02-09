@@ -1,14 +1,63 @@
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { GraphexpComponent } from './graphexp.component';
-import { FormsModule } from '@angular/forms';
+import { GraphConfig } from './graphViz/graphConfig';
+import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {GraphexpComponent} from './graphexp.component';
+import { GraphexpService } from './graphexp.service';
+import {FormsModule} from '@angular/forms';
+import {
+  MatSidenavModule,
+  MatButtonModule,
+  MatIconModule,
+  MatFormFieldModule,
+  MatInputModule,
+  MatListModule,
+  MatSelectModule,
+  MatCheckboxModule,
+  MatToolbarModule,
+  MatSliderModule,
+  MatDialogModule
+} from '@angular/material';
+import {FlexLayoutModule} from '@angular/flex-layout';
+import { NodeEditComponent } from './node-edit/node-edit.component';
+import { LinkEditComponent } from './link-edit/link-edit.component';
 
 @NgModule({
   imports: [
     CommonModule,
-    FormsModule
+    FormsModule,
+    MatSidenavModule,
+    MatButtonModule,
+    MatIconModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatListModule,
+    MatSelectModule,
+    MatCheckboxModule,
+    MatToolbarModule,
+    MatSliderModule,
+    MatDialogModule,
+    FlexLayoutModule
   ],
-  declarations: [GraphexpComponent],
-  exports: [GraphexpComponent ]
+  declarations: [GraphexpComponent, NodeEditComponent, LinkEditComponent],
+  entryComponents: [NodeEditComponent, LinkEditComponent],
+  providers: [],
+  exports: [
+    GraphexpComponent,
+    GraphexpService,
+    GraphConfig,
+    CommonModule,
+    FormsModule,
+    MatSidenavModule,
+    MatButtonModule,
+    MatIconModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatListModule,
+    MatSelectModule,
+    MatCheckboxModule,
+    MatToolbarModule,
+    MatSliderModule,
+    MatDialogModule,
+    FlexLayoutModule]
 })
-export class GraphexpModule { }
+export class GraphexpModule {}

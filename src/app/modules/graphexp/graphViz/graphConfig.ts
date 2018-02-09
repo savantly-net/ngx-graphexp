@@ -3,7 +3,8 @@ import * as d3 from 'd3';
 
 export class GraphConfig {
   enableEdit = true;
-  validLabels: string[] = [];
+  nodeLabels: string[] = [];
+  linkLabels: string[] = [];
   numberOfLayers = 3;
 
   format: GraphsonFormat = GraphsonFormat.GraphSON3;

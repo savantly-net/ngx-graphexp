@@ -1,4 +1,5 @@
 import { D3Node } from '../nodes/d3Node';
+import { GraphConfig } from './graphConfig';
 import { GraphViz } from './graphViz';
 import * as d3 from 'd3';
 
@@ -14,7 +15,7 @@ export class GraphLayers {
     return this.config.numberOfLayers;
   }
 
-  get config() {
+  get config(): GraphConfig {
     return this.graphViz.config;
   }
 

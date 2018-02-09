@@ -1,1 +1,1 @@
-export * from './src/app/modules/graphexp/graphexp.module';
+export * from './src/app/modules/graphexp/index';

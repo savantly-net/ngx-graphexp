@@ -1,6 +1,7 @@
 import {ArrangedGraphData} from '../graphexp.service';
 import { D3Node } from '../nodes/d3Node';
 import { ConnectionCreatedEvent } from './ConnectionCreatedEvent';
+import { GraphConfig } from './graphConfig';
 import {GraphViz} from './graphViz';
 import * as d3 from 'd3';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
@@ -11,7 +12,7 @@ export class GraphNodes {
 
   public connectionCreated: BehaviorSubject<ConnectionCreatedEvent> = new BehaviorSubject<ConnectionCreatedEvent>(null);
 
-  get config() {
+  get config(): GraphConfig {
     return this.graphViz.config;
   }
   get graphRoot() {
@@ -245,9 +246,12 @@ export class GraphNodes {
   }
 
   dragConnectionEnded(d) {
+    const target = d3.event.sourceEvent.toElement;
+    this.graphViz.dragLine.classed('hidden', true);
+    console.log(`connecting to: ${target}`);
     this.connectionCreated.next({
       source: this.mouseDownNode,
-      target: d
+      target: d3.select(target).data()[0]
     });
   }
 

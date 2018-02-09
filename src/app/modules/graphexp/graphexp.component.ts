@@ -1,8 +1,14 @@
-import { GraphConfig } from './graphViz/graphConfig';
+import { ConnectionCreatedEvent } from './graphViz/ConnectionCreatedEvent';
+import {GraphConfig} from './graphViz/graphConfig';
 import {GraphViz} from './graphViz/graphViz';
 import {GraphexpService, GraphsonFormat} from './graphexp.service';
-import { D3Node } from './nodes/d3Node';
-import {Component, OnInit, Input, AfterViewInit, ViewEncapsulation} from '@angular/core';
+import { LinkEditComponent } from './link-edit/link-edit.component';
+import {NodeEditComponent} from './node-edit/node-edit.component';
+import {D3Node} from './nodes/d3Node';
+import { GremlinLink } from './nodes/gremlinLink';
+import {GremlinNode} from './nodes/gremlinNode';
+import {Component, OnInit, Input, ViewEncapsulation} from '@angular/core';
+import {MatDialog} from '@angular/material';
 import {GremlinService, GremlinClientOptions, GremlinQuery} from '@savantly/gremlin-js';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import * as d3 from 'd3';
@@ -14,7 +20,7 @@ import * as d3 from 'd3';
   styleUrls: ['./graphexp.component.css'],
   encapsulation: ViewEncapsulation.None
 })
-export class GraphexpComponent implements AfterViewInit {
+export class GraphexpComponent implements OnInit {
 
   @Input()
   graphexpService: GraphexpService;
@@ -46,41 +52,99 @@ export class GraphexpComponent implements AfterViewInit {
   get edgeProperties() {
     return this.graphexpService.edgeProperties;
   };
+  get enableEdit() {
+    return (this.graphConfig && this.graphConfig.enableEdit);
+  }
+  get nodeLabels() {
+    return this.graphConfig.nodeLabels;
+  }
+  get linkLabels() {
+    return this.graphConfig.linkLabels;
+  }
 
-  ngAfterViewInit(): void {
+  ngOnInit(): void {
     if (!this.graphConfig) {
       this.graphConfig = new GraphConfig();
     }
     this.graphViz = new GraphViz(this.graphexpService, this.graphConfig);
-    this.graphViz.init('#sv_graphexp');
-    this.graphexpService.queryGraphInfo();
+    setTimeout(() => {
+      this.graphViz.init('#sv_graphexp');
+      this.graphexpService.queryGraphInfo();
 
-    this.graphViz.connectionCreated.subscribe(val => {
-      console.log(`GraphexpComponent#ngAfterViewInit: ${val}`);
+      this.graphViz.connectionCreated.subscribe((val: ConnectionCreatedEvent) => {
+        console.log(`GraphexpComponent#ngAfterViewInit: connection created ${val}`);
+        const gremlinLink = new GremlinLink();
+        gremlinLink.source = val.source.id;
+        gremlinLink.target = val.target.id;
+        this.openLinkEditDialog(gremlinLink);
+      });
+
+      this.graphViz.createNodeEvent.subscribe((d3Node: D3Node) => {
+        if (d3Node === null) {
+          return;
+        }
+        const gremlinNode = new GremlinNode();
+        this.openNodeEditDialog(gremlinNode);
+      });
+    });
+
+  }
+
+  openLinkEditDialog(item: GremlinLink) {
+    const dialogRef = this.dialog.open(LinkEditComponent, {
+      width: '30em',
+      data: {labels: this.linkLabels, item: item}
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('The dialog was closed');
+      if (result) {
+        this.createLink(result);
+      }
     });
   }
 
-  createNode() {
-    const props = [];
-    props.push({key: 'name', value: 'jeremy'});
-    this.graphexpService.createNode('titan', props).then(data => {
-    console.log(data);
+  openNodeEditDialog(item?: GremlinNode) {
+    item = item || new GremlinNode();
+    const dialogRef = this.dialog.open(NodeEditComponent, {
+      width: '30em',
+      data: {labels: this.nodeLabels, item: item}
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('The dialog was closed');
+      if (result) {
+        this.createNode(result);
+      }
+    });
+  }
+
+  createLink(data: GremlinLink) {
+    this.graphexpService.createLink(data).then(tinkerNode => {
+      console.log(data);
+    }, err => {console.error(err)});
+  }
+
+  createNode(data: GremlinNode) {
+    this.graphexpService.createNode(data.label, data.properties).then(tinkerNode => {
+      console.log(data);
     }, err => {console.error(err)});
   }
 
   search() {
     console.log(`searching field: ${this.searchField}, value: ${this.searchValue}`);
-      this.graphexpService.queryNodes(this.searchField, this.searchValue).then(data => {
-        this.graphViz.refreshData(data, 1, null);
-      }).catch((err) => {
-        console.error(err);
-      });
+    this.graphexpService.queryNodes(this.searchField, this.searchValue).then(data => {
+      this.graphViz.refreshData(data, 1, null);
+    }).catch((err) => {
+      console.error(err);
+    });
   }
 
   getFlattenedNodeProperties(node: D3Node) {
     const props = [];
     for (const prop of Object.keys(node.properties)) {
-      const val = JSON.stringify(node.properties[prop]);
+      const valArray = node.properties[prop];
+      const val = valArray[0]['value'];
       props.push({
         name: prop,
         value: val
@@ -108,6 +172,6 @@ export class GraphexpComponent implements AfterViewInit {
     this.graphexpService.queryGraphInfo();
   }
 
-  constructor() {}
+  constructor(public dialog: MatDialog) {}
 
 }

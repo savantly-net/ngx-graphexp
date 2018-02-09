@@ -1,65 +1,87 @@
-
-<div id="sv_graphexp_container">
-	<nav>
-		<fieldset>
-			<legend>Navigation</legend>
-			<label>Property</label>
-			<select [(ngModel)]="searchField">
-				<option value="id">id</option>
-				<optgroup label="Node">
-					<option *ngFor="let item of nodeProperties | async" [value]="item">{{item}}</option>
-				</optgroup>
-				<optgroup label="Edge">
-					<option *ngFor="let item of edgeProperties | async" [value]="item">{{item}}</option>
-				</optgroup>
-			</select>
-			<label>Id/Keyword</label>
-			<input name="searchValue" [(ngModel)]="searchValue" />
-			<button class="mat-raised-button" (click)="search()">Search</button>
-			<button class="mat-raised-button" name="clear" (click)="clearGraph()">Clear</button>
-			<button class="mat-raised-button" (click)="createNode()">Test Create</button>
-			<input type="checkbox" name="Freeze" id="freeze-in" /><label>Freeze</label>
-			<input type="checkbox" name="showName_box" id="showName" (click)="showNames()"/><label>Show Labels</label>
-			<input type="number" id="nbLayers" min="1" max="128" (click)="setNumberOfLayers()" [(ngModel)]="numberOfLayers"><label>Visible Layers</label>
-		</fieldset>
-		<!--
-		<fieldset *ngIf="graphConfig.enableEdit">
-			<legend>Create</legend>
-			<select [(ngModel)]="newNode.label">
-				<option *ngFor="let item of graphConfig.validLabels" [value]="item">{{item}}</option>
-			</select>
-			<button class="mat-raised-button" (click)="createNode()">Search</button>
-		</fieldset>
-		-->
-	</nav>
-	
-	<div class="sv-graphexp-content">
-		<div class="sv-graphexp-left-bar">
-			<div>
-				<button class="mat-raised-button" name="graphInfo" (click)="getGraphInfo()">Refresh graph info</button>
-				<input type="checkbox" [(ngModel)]="showGraphInfo" (click)="toggleGraphInfo()"/>Show/hide graph info
-				<div *ngIf="showGraphInfo"><br/>
-					<strong>Node Names</strong>
-					<div *ngFor="let item of nodeNames | async">
-						{{item.key}}: {{item.value}}
+<div fxLayout fxFlexFill class="content sv-graphexp">
+	<mat-sidenav-container fxFLex>
+		<mat-sidenav #graphexpSideMenu position="end" fxLayout="column" fxLayoutGap="1.5em">
+			<button mat-mini-fab color="accent" (click)="graphexpSideMenu.toggle()">
+		      <mat-icon>arrow_right</mat-icon>
+		    </button>
+		    <div fxLayout fxLayoutGap="1em">
+		    	<button mat-raised-button (click)="getGraphInfo()">
+		    		Refresh<mat-icon>refresh</mat-icon>
+		    	</button>
+		    	<button mat-raised-button (click)="openNodeEditDialog()">
+					Create<mat-icon>add</mat-icon>
+				</button>
+		    	<span fxFlex></span>
+				<button mat-raised-button (click)="clearGraph()">
+					Clear<mat-icon>clear</mat-icon>
+				</button>
+		    </div>
+		    <mat-checkbox [(ngModel)]="showGraphInfo">Show Graph Info</mat-checkbox>
+		    <mat-checkbox>Show Selection Properties</mat-checkbox>
+		    <mat-checkbox (click)="showNames()">Show Labels</mat-checkbox>
+		    <mat-checkbox>Freeze Graph</mat-checkbox>
+			<section>
+				<div fxLayout>
+					<label>Visible Layers</label>
+		    		<mat-slider min="1" max="5" [(ngModel)]="numberOfLayers" thumbLabel tickInterval="1"></mat-slider>
+				</div>
+		    </section>		    
+		</mat-sidenav>
+		<div fxLayout="column" fxFlexFill>
+			<mat-toolbar fxLayoutGap="1em">
+			    <label>Search</label>
+				<mat-form-field>
+					<mat-select [(ngModel)]="searchField">
+						<mat-optgroup label="Node">
+							<mat-option value="id">id</mat-option>
+							<mat-option *ngFor="let item of nodeProperties | async" [value]="item">{{item}}</mat-option>
+						</mat-optgroup>
+						<mat-optgroup label="Edge">
+							<mat-option value="id">id</mat-option>
+							<mat-option *ngFor="let item of edgeProperties | async" [value]="item">{{item}}</mat-option>
+						</mat-optgroup>
+					</mat-select>
+				</mat-form-field>
+				<mat-input-container>
+					<input matInput name="searchValue" [(ngModel)]="searchValue" placeholder="Id/Keyword">
+				</mat-input-container>
+				<button (click)="search()" mat-mini-fab>
+					<mat-icon>search</mat-icon>
+				</button>
+				<button mat-mini-fab (click)="openNodeEditDialog()">
+					<mat-icon>add</mat-icon>
+				</button>
+			    <span fxFlex></span>
+				<button mat-mini-fab (click)="graphexpSideMenu.toggle()">
+			      <mat-icon>menu</mat-icon>
+			    </button>
+			</mat-toolbar>
+			
+			<div class="sv-graphexp-content">
+				<div class="sv-graphexp-left-bar">
+					<div *ngIf="showGraphInfo"><br/>
+						<strong>Node Names</strong>
+						<div *ngFor="let item of nodeNames | async">
+							{{item.key}}: {{item.value}}
+						</div>
 					</div>
+				</div>
+				<div class="sv-graphexp-right-bar">
+					<strong>Selected Node</strong>
+						<div *ngIf="selectedNode">
+							<div>Label: {{selectedNode.label}}</div>
+							<div>Type: {{selectedNode.type}}</div>
+							<div *ngFor="let prop of getFlattenedNodeProperties(selectedNode)">
+								<div>{{prop.name}}: {{prop.value}}</div>
+							</div>
+						</div>
+				</div>
+				
+				<div class="sv-graphexp" id="sv_graphexp">
+					<svg></svg>
 				</div>
 			</div>
 		</div>
-		<div class="sv-graphexp-right-bar">
-			<strong>Selected Node</strong>
-				<div *ngIf="selectedNode">
-					<div>Label: {{selectedNode.label}}</div>
-					<div>Type: {{selectedNode.type}}</div>
-					<div *ngFor="let prop of getFlattenedNodeProperties(selectedNode)">
-						<div>{{prop.name}}: {{prop.value}}</div>
-					</div>
-				</div>
-		</div>
-		
-		<div class="sv-graphexp" id="sv_graphexp">
-			<svg></svg>
-		</div>
-	</div>
+	</mat-sidenav-container>
 </div>
 

@@ -1,4 +1,4 @@
-import { GraphexpService } from './modules/graphexp/graphexp.service';
+import { GraphConfig, GraphexpService } from '@savantly/ngx-graphexp';
 import { Component } from '@angular/core';
 
 @Component({
@@ -8,14 +8,11 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
 
+  graphConfig: GraphConfig = new GraphConfig();
+
   constructor (public service: GraphexpService) {
-
-
-//    subMenuItem.items.push(subSubMenuItem);
-//    menuItem.items.push(subMenuItem);
-//
-//    menuService.addMenu(menuItem);
-//    console.log(menuItem);
+    this.graphConfig.nodeLabels = ['god', 'titan', 'demigod', 'human', 'monster', 'location'];
+    this.graphConfig.linkLabels = ['is_father_of', 'has_pet', 'lives_in'];
   }
 
 }

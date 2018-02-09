@@ -1,4 +1,5 @@
 import { D3Node } from './nodes/d3Node';
+import { GremlinLink } from './nodes/gremlinLink';
 import { TinkerNode } from './nodes/tinkerNode';
 import {Injectable} from '@angular/core';
 import {GremlinService, GremlinClientOptions, GremlinQuery, GremlinQueryResponse} from '@savantly/gremlin-js';
@@ -104,6 +105,21 @@ export class GraphexpService {
         propString += `, '${kv.key}', '${kv.value}'`;
       });
       const gremlin = `vertex = graph.addVertex(label, '${label}'${propString})`;
+      console.log(`executing query: ${gremlin}`);
+      this.executeQuery(gremlin).then(response => {
+        resolve(response.data);
+      }, error => {
+        console.error(error);
+        reject(error);
+      });
+    });
+    return promise;
+  }
+
+  public createLink(item: GremlinLink) {
+    const properties = item.properties;
+    const promise = new Promise<TinkerNode>((resolve, reject) => {
+      const gremlin = `edge = g.V(${item.source}).next().addEdge('${item.label}',g.V(${item.target}).next());`;
       console.log(`executing query: ${gremlin}`);
       this.executeQuery(gremlin).then(response => {
         resolve(response.data);

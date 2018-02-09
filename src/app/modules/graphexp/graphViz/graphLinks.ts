@@ -1,10 +1,12 @@
 import {ArrangedGraphData} from '../graphexp.service';
+import { D3Node } from '../nodes/d3Node';
+import { GraphConfig } from './graphConfig';
 import {GraphViz} from './graphViz';
 import * as d3 from 'd3';
 
 export class GraphLinks {
 
-  get config() {
+  get config(): GraphConfig {
     return this.graphViz.config;
   }
 
@@ -12,11 +14,11 @@ export class GraphLinks {
     return this.graphViz.graphRoot;
   }
 
-  get linkModels() {
+  get linkModels(): D3Node[] {
     return this.graphViz.linkModels;
   }
 
-  get nodeModels() {
+  get nodeModels(): D3Node[] {
     return this.graphViz.nodeModels;
   }
 
@@ -167,7 +169,7 @@ export class GraphLinks {
 
   }
 
-  nodeModelById(id) {
+  nodeModelById(id): D3Node {
     // return data associated to the node with id 'id'
     for (const node in this.nodeModels) {
       // console.log(_Nodes[node])

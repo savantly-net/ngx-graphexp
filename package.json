@@ -8,7 +8,6 @@
     "type": "git",
     "url": "https://github.com/savantly-net/ngx-gremlin.git"
   },
-  "browser": true,
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -29,9 +28,11 @@
   "author": "Jeremy@Savantly.net",
   "license": "MIT",
   "peerDependencies": {
-    "@angular/common": "^4.4.5",
-    "@angular/core": "^4.4.5",
-    "@angular/http": "^4.4.5",
+    "@angular/cdk": "5.2.0",
+    "@angular/common": "~5.2",
+    "@angular/core": "~5.2",
+    "@angular/http": "~5.2",
+    "@angular/material": "^5.2.0",
     "@savantly/gremlin-js": "^1.2.0",
     "buffer": "^5.0.8",
     "d3": "^4.13.0",
@@ -39,21 +40,23 @@
     "zone.js": "^0.8.17"
   },
   "devDependencies": {
-    "@angular/cli": "^1.5.0",
-    "@angular/common": "^4.4.6",
-    "@angular/compiler": "^4.4.6",
-    "@angular/compiler-cli": "^4.4.6",
-    "@angular/core": "^4.4.6",
-    "@angular/forms": "^4.4.5",
-    "@angular/http": "^4.4.5",
-    "@angular/platform-browser": "^4.4.6",
-    "@angular/platform-browser-dynamic": "^4.4.6",
-    "@angular/router": "^4.4.6",
-    "@savantly/gremlin-js": "^1.2.0",
+    "@angular/cdk": "5.2.0",
+    "@angular/cli": "^1.6.8",
+    "@angular/common": "~5.2",
+    "@angular/compiler": "~5.2",
+    "@angular/compiler-cli": "~5.2",
+    "@angular/core": "~5.2",
+    "@angular/forms": "~5.2",
+    "@angular/http": "~5.2",
+    "@angular/material": "^5.2.0",
+    "@angular/platform-browser": "~5.2",
+    "@angular/platform-browser-dynamic": "~5.2",
+    "@angular/router": "~5.2",
+    "@savantly/gremlin-js": "^1.2.1",
     "@types/jasmine": "^2.6.0",
     "angular-ide": "^0.9.31",
     "buffer": "^5.0.8",
-    "codelyzer": "^3.2.0",
+    "codelyzer": "^4.1.0",
     "core-js": "^2.5.1",
     "cpr": "^2.2.0",
     "d3": "^4.13.0",
@@ -73,5 +76,8 @@
     "typescript": "^2.5.2",
     "zone.js": "^0.8.17"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@angular/animations": "^5.2.4",
+    "@angular/flex-layout": "^2.0.0-beta.12"
+  }
 }

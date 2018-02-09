@@ -2,7 +2,8 @@
   "extends": "../tsconfig.json",
   "angularCompilerOptions": {
     "paths": {
-      "@savantly/ngx-menu": [ "../dist/ngx-menu" ],
+      "@savantly/ngx-graphexp": [ "../dist/" ],
+      "@savantly/gremlin-js": [ "../node_modules/@savantly/gremlin-js" ],
       "@angular/*": ["../node_modules/@angular/*"]
     }
   },
@@ -12,7 +13,8 @@
     "baseUrl": "",
     "types": [],
     "paths": {
-      "@savantly/ngx-menu": [ "../dist/ngx-menu" ]
+      "@savantly/ngx-graphexp": [ "../dist" ],
+      "@savantly/gremlin-js": [ "../node_modules/@savantly/gremlin-js" ]
     }
   },
   "exclude": [

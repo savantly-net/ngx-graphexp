@@ -1,6 +1,7 @@
 import {GraphLayers} from './graphLayers';
 import {GraphShapes} from './graphShapes';
 import {GraphexpService, GraphsonFormat, ArrangedGraphData} from '../graphexp.service';
+import { D3Node } from '../nodes/d3Node';
 import { ConnectionCreatedEvent } from './ConnectionCreatedEvent';
 import {GraphConfig} from './graphConfig';
 import {GraphLinks} from './graphLinks';
@@ -28,6 +29,7 @@ export class GraphViz {
 
   public selectedNode: BehaviorSubject<any> = new BehaviorSubject<any>(null);
   public connectionCreated: Observable<ConnectionCreatedEvent>;
+  public createNodeEvent: BehaviorSubject<D3Node> = new BehaviorSubject<D3Node>(null);
 
   get config() {
     return this._config;
@@ -311,8 +313,10 @@ export class GraphViz {
     this._graphLinks = new GraphLinks(this);
 
     const svg = d3.select(label).select('svg');
-    this._graphWidth = +d3.select(label).node().getBoundingClientRect().width
-    this._graphHeight = +d3.select(label).node().getBoundingClientRect().height;
+    const width = +d3.select(label).node().getBoundingClientRect().width;
+    const height =  +d3.select(label).node().getBoundingClientRect().height;
+    this._graphWidth = width;
+    this._graphHeight = height;
 
     // displayed when dragging between nodes
     this.dragLine = svg.append('svg:path')
