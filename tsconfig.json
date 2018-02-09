@@ -17,8 +17,8 @@
       "dom"
     ],
     "paths": {
-      "@savantly/ngx-graphexp": [ "./dist/" ],
-      "@savantly/gremlin-js": [ "./node_modules/@savantly/gremlin-js" ],
+      "@savantly/ngx-graphexp": [ "./dist/@savantly" ],
+      "@savantly/gremlin-js": [ "./node_modules/@savantly/gremlin-js/" ],
       "@angular/*": [ "./node_modules/@angular/*"]
     }
   },

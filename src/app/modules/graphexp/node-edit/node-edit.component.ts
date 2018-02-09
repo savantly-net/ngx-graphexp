@@ -15,7 +15,7 @@ export class NodeEditComponent implements OnInit {
 
   constructor(
     public dialogRef: MatDialogRef<NodeEditComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: {labels: string[], item: GremlinNode}) {}
+    @Inject(MAT_DIALOG_DATA) public data: any) {}
 
   ngOnInit() {
   }

@@ -15,7 +15,7 @@ export class LinkEditComponent implements OnInit {
 
   constructor(
     public dialogRef: MatDialogRef<LinkEditComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: {labels: string[], item: GremlinLink}) {}
+    @Inject(MAT_DIALOG_DATA) public data: any) {}
 
 
   ngOnInit() {
