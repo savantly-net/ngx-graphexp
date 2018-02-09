@@ -2,7 +2,7 @@
   "extends": "../tsconfig.json",
   "angularCompilerOptions": {
     "paths": {
-      "@savantly/ngx-graphexp": [ "../public_api.ts" ]
+      "@savantly/ngx-graphexp": [ "./app/modules/graphexp/index" ]
     }
   },
   "compilerOptions": {
@@ -11,7 +11,7 @@
     "baseUrl": "",
     "types": [],
     "paths": {
-      "@savantly/ngx-graphexp": [ "../public_api.ts" ]
+      "@savantly/ngx-graphexp": [ "./app/modules/graphexp/index" ]
     }
   },
   "exclude": [

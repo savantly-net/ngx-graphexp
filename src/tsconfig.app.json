@@ -2,9 +2,10 @@
   "extends": "../tsconfig.json",
   "angularCompilerOptions": {
     "paths": {
-      "@savantly/ngx-graphexp": [ "../dist/ngx-graphexp" ],
+      "@savantly/ngx-graphexp": [ "./app/modules/graphexp/index" ],
       "@savantly/gremlin-js": [ "../node_modules/@savantly/gremlin-js/" ],
-      "@angular/*": ["../node_modules/@angular/*"]
+      "@angular/*": ["../node_modules/@angular/*"],
+      "rxjs/*": [ "../node_modules/rxjs/*"]
     }
   },
   "compilerOptions": {
@@ -13,8 +14,10 @@
     "baseUrl": "",
     "types": [],
     "paths": {
-      "@savantly/ngx-graphexp": [ "../dist/ngx-graphexp" ],
-      "@savantly/gremlin-js": [ "../node_modules/@savantly/gremlin-js/" ]
+      "@savantly/ngx-graphexp": [ "./app/modules/graphexp/index" ],
+      "@savantly/gremlin-js": [ "../node_modules/@savantly/gremlin-js/" ],
+      "@angular/*": ["../node_modules/@angular/*"],
+      "rxjs/*": [ "../node_modules/rxjs/*"]
     }
   },
   "exclude": [

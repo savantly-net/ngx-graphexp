@@ -1,8 +1,9 @@
-import { GraphConfig } from './graphViz/graphConfig';
+export { GraphexpService } from './graphexp.service';
+export { GraphConfig } from './graphViz/graphConfig';
+
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {GraphexpComponent} from './graphexp.component';
-import { GraphexpService } from './graphexp.service';
 import {FormsModule} from '@angular/forms';
 import {
   MatSidenavModule,
@@ -43,8 +44,6 @@ import { LinkEditComponent } from './link-edit/link-edit.component';
   providers: [],
   exports: [
     GraphexpComponent,
-    GraphexpService,
-    GraphConfig,
     CommonModule,
     FormsModule,
     MatSidenavModule,
