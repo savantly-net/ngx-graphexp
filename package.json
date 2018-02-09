@@ -1,6 +1,6 @@
 {
   "name": "@savantly/ngx-graphexp",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Gremlin client [Tinkerpop] for an Angular app",
   "main": "public_api.ts",
   "homepage": "https://github.com/savantly-net/ngx-graphexp",
