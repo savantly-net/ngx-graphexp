@@ -1,3 +1,4 @@
+import { KV } from '../graphexp.service';
 import { GremlinNode } from '../nodes/gremlinNode';
 import {Component, OnInit, Inject} from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
@@ -10,7 +11,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 export class NodeEditComponent implements OnInit {
 
   createProperty() {
-    this.data.item.properties.push({key: '', value: ''});
+    this.data.item.properties.push(new KV());
   }
 
   constructor(

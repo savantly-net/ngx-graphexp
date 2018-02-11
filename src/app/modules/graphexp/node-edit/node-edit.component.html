@@ -14,10 +14,10 @@
 	
 	<div fxLayout fxLayoutGap="1em" *ngFor="let item of data.item.properties">
 		<mat-input-container>
-			<input matInput placeholder="property name" [(ngModel)]="item.key">
+			<input #propertyName matInput placeholder="property name" [(ngModel)]="item.key" />
 		</mat-input-container>
 		<mat-input-container>
-			<input matInput placeholder="property value" [(ngModel)]="item.value">
+			<input #propertyValue matInput placeholder="property value" [(ngModel)]="item.value" />
 		</mat-input-container>
 	</div>
 </mat-dialog-content>
