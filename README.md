@@ -1,5 +1,7 @@
 # ngx-graphexp
-GraphExp plugin for Angular
+GraphExp plugin for Angular  
+Inspired by [GraphExp](https://github.com/bricaud/graphexp)  
+
 
 ## Installation  
 yarn -  
