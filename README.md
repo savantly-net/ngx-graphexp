@@ -11,6 +11,10 @@ npm -
     npm install @savantly/ngx-graphexp  
 
 
+## Demo app  
+[Demo](./examples/app)  
+
+
 ## Usage  
 Import the required modules into your application  
 
@@ -66,4 +70,16 @@ shift-drag to create a new connection between nodes
 ![drag link](./examples/example_drag_link.png)  
 
 Select the label and add properties to the link  
-![create link](./examples/example_create_link.png)
+![create link](./examples/example_create_link.png)  
+
+
+## Build/Development
+
+To build the library - use yarn or npm  
+`yarn build:lib`  
+
+To build the example app -  
+`yarn build`  
+
+Files are output to `./dist`  
+
