@@ -75,7 +75,7 @@
     "karma-jasmine": "^1.1.0",
     "karma-jasmine-html-reporter": "^0.2.2",
     "karma-spec-reporter": "0.0.31",
-    "ng-packagr": "2.0.0",
+    "ng-packagr": "10.1.1",
     "protractor": "^5.1.2",
     "rimraf": "^2.6.2",
     "rxjs": "^5.5.6",
